@@ -118,7 +118,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 GPU(
                     renderer = renderer,
                     vendor = vendor,
-                    glesVersion = GpuUtils.getGlesVersion(context)
+                    glesVersion = GpuUtils.getGlesVersion(context),
                 )
             }
         }

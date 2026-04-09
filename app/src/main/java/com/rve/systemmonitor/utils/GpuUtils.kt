@@ -17,7 +17,7 @@ object GpuUtils {
 
         val configAttribs = intArrayOf(
             EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
-            EGL14.EGL_NONE
+            EGL14.EGL_NONE,
         )
         val configs = arrayOfNulls<EGLConfig>(1)
         val numConfigs = IntArray(1)
@@ -25,14 +25,14 @@ object GpuUtils {
 
         val contextAttribs = intArrayOf(
             EGL14.EGL_CONTEXT_CLIENT_VERSION, 2,
-            EGL14.EGL_NONE
+            EGL14.EGL_NONE,
         )
         val context = EGL14.eglCreateContext(display, configs[0], EGL14.EGL_NO_CONTEXT, contextAttribs, 0)
 
         val surfaceAttribs = intArrayOf(
             EGL14.EGL_WIDTH, 1,
             EGL14.EGL_HEIGHT, 1,
-            EGL14.EGL_NONE
+            EGL14.EGL_NONE,
         )
         val surface = EGL14.eglCreatePbufferSurface(display, configs[0], surfaceAttribs, 0)
 

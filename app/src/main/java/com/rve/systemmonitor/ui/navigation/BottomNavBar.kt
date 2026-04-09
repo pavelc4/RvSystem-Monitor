@@ -149,7 +149,7 @@ object BottomNavBar {
                     val animationSpec = spring(
                         dampingRatio = 0.5f,
                         stiffness = 300f,
-                        visibilityThreshold = 0.001f
+                        visibilityThreshold = 0.001f,
                     )
                     awaitEachGesture {
                         awaitFirstDown(requireUnconsumed = false)

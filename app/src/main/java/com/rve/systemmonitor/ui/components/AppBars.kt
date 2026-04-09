@@ -32,8 +32,8 @@ object AppBars {
                 )
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent
-            )
+                containerColor = Color.Transparent,
+            ),
         )
     }
 }

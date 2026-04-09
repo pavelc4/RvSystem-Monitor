@@ -47,9 +47,9 @@ import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsy
 import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_memory_rounded_filled
 import com.rve.systemmonitor.ui.components.AppBars.SimpleTopAppBar
 import com.rve.systemmonitor.ui.data.CPU
-import com.rve.systemmonitor.ui.data.GPU
 import com.rve.systemmonitor.ui.data.Device
 import com.rve.systemmonitor.ui.data.Display
+import com.rve.systemmonitor.ui.data.GPU
 import com.rve.systemmonitor.ui.data.OS
 import com.rve.systemmonitor.ui.data.RAM
 import com.rve.systemmonitor.ui.data.ZRAM
@@ -72,7 +72,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                 subtitle = "Home",
             )
         },
-        containerColor = MaterialTheme.colorScheme.surfaceContainer
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ) { innerPadding ->
         Surface(
             modifier = Modifier
@@ -80,7 +80,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
                 .padding(top = innerPadding.calculateTopPadding()),
             shape = RoundedCornerShape(
                 topStart = 32.dp,
-                topEnd = 32.dp
+                topEnd = 32.dp,
             ),
         ) {
             LazyColumn(
