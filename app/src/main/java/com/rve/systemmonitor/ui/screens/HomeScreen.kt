@@ -1,0 +1,452 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+
+package com.rve.systemmonitor.ui.screens
+
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.composables.icons.materialsymbols.rounded.R.drawable.materialsymbols_ic_mobile_3_rounded
+import com.composables.icons.materialsymbols.rounded.R.drawable.materialsymbols_ic_mobile_rounded
+import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_android_rounded_filled
+import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_memory_alt_rounded_filled
+import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_memory_rounded_filled
+import com.rve.systemmonitor.ui.components.AppBars.SimpleTopAppBar
+import com.rve.systemmonitor.ui.data.CPU
+import com.rve.systemmonitor.ui.data.Device
+import com.rve.systemmonitor.ui.data.Display
+import com.rve.systemmonitor.ui.data.OS
+import com.rve.systemmonitor.ui.data.RAM
+import com.rve.systemmonitor.ui.data.ZRAM
+import com.rve.systemmonitor.ui.viewmodel.HomeViewModel
+
+@Composable
+fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
+    val device by viewModel.device.collectAsStateWithLifecycle()
+    val os by viewModel.os.collectAsStateWithLifecycle()
+    val display by viewModel.display.collectAsStateWithLifecycle()
+    val cpu by viewModel.cpu.collectAsStateWithLifecycle()
+    val ram by viewModel.ram.collectAsStateWithLifecycle()
+    val zram by viewModel.zram.collectAsStateWithLifecycle()
+
+    Scaffold(
+        topBar = {
+            SimpleTopAppBar(
+                title = "RvSystem Monitor",
+                subtitle = "Home",
+            )
+        },
+    ) { innerPadding ->
+        LazyColumn(
+            contentPadding = PaddingValues(
+                top = innerPadding.calculateTopPadding(),
+                bottom = innerPadding.calculateBottomPadding() + 96.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) {
+            item {
+                DeviceCard(device)
+            }
+            item {
+                OSCard(os)
+            }
+            item {
+                DisplayCard(display)
+            }
+            item {
+                CPUCard(cpu)
+            }
+            item {
+                MemoryCard(
+                    ram = ram,
+                    zram = zram,
+                    isZramActive = zram.isActive,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun DeviceCard(device: Device) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        shape = MaterialTheme.shapes.largeIncreased,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "Device",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            HorizontalDivider(
+                thickness = 2.dp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    painter = painterResource(materialsymbols_ic_mobile_rounded),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1f),
+                )
+                Column {
+                    Text(
+                        text = "Manufacturer: ${device.manufacturer}",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = "Model: ${device.model}",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = "Device: ${device.device}",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun OSCard(os: OS) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        shape = MaterialTheme.shapes.largeIncreased,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "OS",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            HorizontalDivider(
+                thickness = 2.dp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    painter = painterResource(materialsymbols_ic_android_rounded_filled),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1f),
+                )
+                Column {
+                    Text(
+                        text = "OS: ${os.name} ${os.version} (${os.dessertName})",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = "SDK: ${os.sdk}",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = "Security Patch: ${os.securityPatch}",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DisplayCard(display: Display) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        shape = MaterialTheme.shapes.largeIncreased,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "Display",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            HorizontalDivider(
+                thickness = 2.dp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    painter = painterResource(materialsymbols_ic_mobile_3_rounded),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1f),
+                )
+                Column {
+                    Text(
+                        text = "Pixels: ${display.resolution} (${display.screenSizeInches}\")",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = "Refresh Rate: ${display.refreshRate}Hz",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = "Density: ${display.densityDpi}dpi",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CPUCard(cpu: CPU) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        shape = MaterialTheme.shapes.largeIncreased,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = "CPU",
+                style = MaterialTheme.typography.titleLarge,
+            )
+            HorizontalDivider(
+                thickness = 2.dp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(
+                    painter = painterResource(materialsymbols_ic_memory_rounded_filled),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1f),
+                )
+                Column {
+                    Text(
+                        text = "Vendor: ${cpu.manufacturer}",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = "Model: ${cpu.model}",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = "Cores: ${cpu.cores} Cores",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MemoryCard(ram: RAM, zram: ZRAM, isZramActive: Boolean = false) {
+    val density = LocalDensity.current
+    val customStroke = remember(density) {
+        with(density) {
+            Stroke(
+                width = 12.dp.toPx(),
+                cap = StrokeCap.Round,
+            )
+        }
+    }
+
+    val ramTargetProgress = if (ram.usedPercentage.isNaN()) {
+        0f
+    } else {
+        (ram.usedPercentage.toFloat() / 100f)
+    }
+    val ramAnimatedProgress by animateFloatAsState(
+        targetValue = ramTargetProgress,
+        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+        label = "RAM Progress Animation",
+    )
+
+    val zramTargetProgress = if (zram.usedPercentage.isNaN()) {
+        0f
+    } else {
+        (zram.usedPercentage.toFloat() / 100f)
+    }
+    val zramAnimatedProgress by animateFloatAsState(
+        targetValue = zramTargetProgress,
+        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
+        label = "ZRAM Progress Animation",
+    )
+
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ),
+        shape = MaterialTheme.shapes.largeIncreased,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Icon(
+                    painter = painterResource(materialsymbols_ic_memory_alt_rounded_filled),
+                    contentDescription = null,
+                )
+                Text(
+                    text = "Memory",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
+            HorizontalDivider(
+                thickness = 2.dp,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                CircularWavyProgressIndicator(
+                    progress = { ramAnimatedProgress },
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    stroke = customStroke,
+                    trackStroke = customStroke,
+                    wavelength = 25.dp,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .aspectRatio(1f),
+                )
+                Column {
+                    Text(
+                        text = "Total RAM: ${ram.total} GB",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = "Available RAM: ${ram.available} GB",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = "Used RAM: ${ram.used} GB (${ram.usedPercentage}%)",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+            if (isZramActive) {
+                HorizontalDivider(
+                    thickness = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Row(
+                    modifier = Modifier.height(IntrinsicSize.Min),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    CircularWavyProgressIndicator(
+                        progress = { zramAnimatedProgress },
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        stroke = customStroke,
+                        trackStroke = customStroke,
+                        wavelength = 25.dp,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .aspectRatio(1f),
+                    )
+                    Column {
+                        Text(
+                            text = "Total ZRAM: ${zram.total} GB",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Text(
+                            text = "Available ZRAM: ${zram.available} GB",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Text(
+                            text = "Used ZRAM: ${zram.used} GB (${zram.usedPercentage}%)",
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
