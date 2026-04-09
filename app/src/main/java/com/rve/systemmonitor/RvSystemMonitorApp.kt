@@ -1,9 +1,7 @@
 package com.rve.systemmonitor
 
+import android.os.Build
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -11,26 +9,64 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.rve.systemmonitor.ui.navigation.BottomNavBar.BottomNavigationBar
-import com.rve.systemmonitor.ui.navigation.Route
 import com.rve.systemmonitor.ui.screens.CPUScreen
 import com.rve.systemmonitor.ui.screens.HomeScreen
 import com.rve.systemmonitor.ui.screens.ProcessesScreen
 import com.rve.systemmonitor.ui.screens.RAMScreen
+import kotlinx.coroutines.launch
 
 @Composable
 fun RvSystemMonitorApp() {
-    val navController = rememberNavController()
+    val pagerState = rememberPagerState(pageCount = { 4 })
+    val coroutineScope = rememberCoroutineScope()
+
+    val pageHistory = remember { mutableStateListOf(0) }
+    var isNavigatingBack by remember { mutableStateOf(false) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        if (isNavigatingBack) {
+            isNavigatingBack = false
+        } else {
+            val currentPage = pagerState.currentPage
+
+            if (pageHistory.lastOrNull() != currentPage) {
+                pageHistory.remove(currentPage)
+                pageHistory.add(currentPage)
+            }
+        }
+    }
+
+    BackHandler(enabled = pageHistory.size > 1) {
+        coroutineScope.launch {
+            isNavigatingBack = true
+
+            if (Build.VERSION.SDK_INT >= 35) {
+                pageHistory.removeLast()
+            } else {
+                pageHistory.removeAt(pageHistory.lastIndex)
+            }
+
+            val previousPage = pageHistory.last()
+            pagerState.animateScrollToPage(previousPage)
+        }
+    }
 
     val backgroundColor = MaterialTheme.colorScheme.background
     val backdrop = rememberLayerBackdrop {
@@ -43,81 +79,22 @@ fun RvSystemMonitorApp() {
             .fillMaxSize()
             .background(backgroundColor),
     ) {
-        val getTabIndex: (String?) -> Int = { route ->
-            when {
-                route == null -> 0
-                route.contains("Home") -> 0
-                route.contains("CPU") -> 1
-                route.contains("RAM") -> 2
-                route.contains("Processes") -> 3
-                else -> 0
-            }
-        }
-
-        NavHost(
-            navController = navController,
-            startDestination = Route.Home,
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier.layerBackdrop(backdrop),
-            enterTransition = {
-                val initialIndex = getTabIndex(initialState.destination.route)
-                val targetIndex = getTabIndex(targetState.destination.route)
-                val isMovingRight = targetIndex > initialIndex
-
-                slideInHorizontally(
-                    initialOffsetX = { fullWidth -> if (isMovingRight) fullWidth else -fullWidth },
-                    animationSpec = tween(durationMillis = 300)
-                )
-            },
-            exitTransition = {
-                val initialIndex = getTabIndex(initialState.destination.route)
-                val targetIndex = getTabIndex(targetState.destination.route)
-                val isMovingRight = targetIndex > initialIndex
-
-                slideOutHorizontally(
-                    targetOffsetX = { fullWidth -> if (isMovingRight) -fullWidth else fullWidth },
-                    animationSpec = tween(durationMillis = 300)
-                )
-            },
-            popEnterTransition = {
-                val initialIndex = getTabIndex(initialState.destination.route)
-                val targetIndex = getTabIndex(targetState.destination.route)
-                val isMovingRight = targetIndex > initialIndex
-
-                slideInHorizontally(
-                    initialOffsetX = { fullWidth -> if (isMovingRight) fullWidth else -fullWidth },
-                    animationSpec = tween(durationMillis = 300)
-                )
-            },
-            popExitTransition = {
-                val initialIndex = getTabIndex(initialState.destination.route)
-                val targetIndex = getTabIndex(targetState.destination.route)
-                val isMovingRight = targetIndex > initialIndex
-
-                slideOutHorizontally(
-                    targetOffsetX = { fullWidth -> if (isMovingRight) -fullWidth else fullWidth },
-                    animationSpec = tween(durationMillis = 300)
-                )
-            }
-        ) {
-            composable<Route.Home> {
-                HomeScreen()
-            }
-            composable<Route.CPU> {
-                BackHandler { navController.popBackStack() }
-                CPUScreen()
-            }
-            composable<Route.RAM> {
-                BackHandler { navController.popBackStack() }
-                RAMScreen()
-            }
-            composable<Route.Processes> {
-                BackHandler { navController.popBackStack() }
-                ProcessesScreen()
+            beyondViewportPageCount = 1,
+        ) { page ->
+            when (page) {
+                0 -> HomeScreen()
+                1 -> CPUScreen()
+                2 -> RAMScreen()
+                3 -> ProcessesScreen()
             }
         }
 
         BottomNavigationBar(
-            navController = navController,
+            pagerState = pagerState,
+            coroutineScope = coroutineScope,
             backdrop = backdrop,
             modifier = Modifier
                 .align(Alignment.BottomCenter)

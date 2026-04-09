@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -25,11 +26,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.composables.icons.materialsymbols.rounded.R.drawable.materialsymbols_ic_home_rounded
 import com.composables.icons.materialsymbols.rounded.R.drawable.materialsymbols_ic_list_rounded
 import com.composables.icons.materialsymbols.rounded.R.drawable.materialsymbols_ic_memory_alt_rounded
@@ -43,15 +39,14 @@ import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 object BottomNavBar {
-    data class NavItem(val label: String, val iconUnselected: Int, val iconSelected: Int, val route: Route)
+    data class NavItem(val label: String, val iconUnselected: Int, val iconSelected: Int)
 
     @Composable
-    fun BottomNavigationBar(navController: NavController, backdrop: Backdrop, modifier: Modifier = Modifier) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentDestination = navBackStackEntry?.destination
-
+    fun BottomNavigationBar(pagerState: PagerState, coroutineScope: CoroutineScope, backdrop: Backdrop, modifier: Modifier = Modifier) {
         val backgroundColor = MaterialTheme.colorScheme.background.copy(alpha = 0.5f)
 
         val items = listOf(
@@ -59,25 +54,21 @@ object BottomNavBar {
                 label = "Home",
                 iconUnselected = materialsymbols_ic_home_rounded,
                 iconSelected = materialsymbols_ic_home_rounded_filled,
-                route = Route.Home,
             ),
             NavItem(
                 label = "CPU",
                 iconUnselected = materialsymbols_ic_memory_rounded,
                 iconSelected = materialsymbols_ic_memory_rounded_filled,
-                route = Route.CPU,
             ),
             NavItem(
                 label = "RAM",
                 iconUnselected = materialsymbols_ic_memory_alt_rounded,
                 iconSelected = materialsymbols_ic_memory_alt_rounded_filled,
-                route = Route.RAM,
             ),
             NavItem(
                 label = "Processes",
                 iconUnselected = materialsymbols_ic_list_rounded,
                 iconSelected = materialsymbols_ic_list_rounded_filled,
-                route = Route.Processes,
             ),
         )
 
@@ -100,20 +91,16 @@ object BottomNavBar {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items.forEach { item ->
-                    val isSelected = currentDestination?.hierarchy?.any { it.hasRoute(item.route::class) } == true
+                items.forEachIndexed { index, item ->
+                    val isSelected = pagerState.currentPage == index
 
                     BottomNavItem(
                         backdrop = backdrop,
                         item = item,
                         isSelected = isSelected,
                         onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
                             }
                         },
                     )
