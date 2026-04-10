@@ -55,6 +55,7 @@ import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsy
 import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_memory_rounded_filled
 import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_mobile_3_rounded_filled
 import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_mobile_rounded_filled
+import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_view_in_ar_rounded_filled
 import com.rve.systemmonitor.ui.components.AppBars.SimpleTopAppBar
 import com.rve.systemmonitor.ui.data.CPU
 import com.rve.systemmonitor.ui.data.Device
@@ -525,51 +526,89 @@ fun CPUCard(cpu: CPU) {
 @Composable
 fun GPUCard(gpu: GPU) {
     Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
-        shape = MaterialTheme.shapes.largeIncreased,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(
-                text = "GPU",
-                style = MaterialTheme.typography.titleLarge,
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Icon(
+                painter = painterResource(id = materialsymbols_ic_view_in_ar_rounded_filled),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(160.dp)
+                    .offset(y = 30.dp)
+                    .alpha(0.30f),
             )
-            HorizontalDivider(
-                thickness = 2.dp,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
-            Row(
-                modifier = Modifier.height(IntrinsicSize.Min),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Icon(
-                    painter = painterResource(materialsymbols_ic_memory_rounded_filled),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1f),
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.primary)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            painter = painterResource(id = materialsymbols_ic_view_in_ar_rounded_filled),
+                            contentDescription = "GPU Icon",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                        )
+                    }
+
+                    Text(
+                        text = "Graphics",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+
                 Column {
                     Text(
-                        text = "GPU: ${gpu.renderer}",
-                        style = MaterialTheme.typography.bodyLarge,
+                        text = gpu.renderer,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Vendor: ${gpu.vendor}",
+                        text = "by ${gpu.vendor}",
                         style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    Text(
-                        text = "OpenGL ES: ${gpu.glesVersion}",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.secondary)
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                    ) {
+                        Text(
+                            text = "OpenGL ES ${gpu.glesVersion}",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSecondary,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
                 }
             }
         }
