@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+/rust/target/
+**/*.rs.bk
+/app/src/main/jniLibs/

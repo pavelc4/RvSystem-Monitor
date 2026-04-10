@@ -79,3 +79,21 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
+
+tasks.register<Exec>("buildRustLibraries") {
+    group = "rust"
+    description = "Compiles Rust code using cargo-ndk and outputs the .so files to jniLibs"
+    workingDir = file("../rust")
+
+    commandLine(
+        "cargo", "ndk",
+        "-t", "armeabi-v7a",
+        "-t", "arm64-v8a",
+        "-o", "../app/src/main/jniLibs",
+        "build", "--release"
+    )
+}
+
+tasks.named("preBuild") {
+    dependsOn("buildRustLibraries")
+}

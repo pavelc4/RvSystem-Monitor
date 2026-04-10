@@ -131,7 +131,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
             val context = getApplication<Application>()
 
             while (isActive) {
-                val newRamData = MemoryUtils.getRamData(context)
+                val newRamData = MemoryUtils.getRamData()
                 val newZramData = MemoryUtils.getZramData()
                 _ram.update { newRamData }
                 _zram.update { newZramData }
