@@ -6,11 +6,7 @@ import android.util.Log
 object CpuUtils {
     private const val TAG = "CpuUtils"
 
-    /**
-     * Mengambil nama pembuat Chipset (misal: Qualcomm, MediaTek, Samsung)
-     */
     fun getSocManufacturer(): String = runCatching {
-        // Build.SOC_MANUFACTURER tersedia mulai API 31
         val manufacturer = Build.SOC_MANUFACTURER
         if (manufacturer != Build.UNKNOWN) {
             manufacturer.replaceFirstChar { it.uppercase() }
@@ -22,11 +18,7 @@ object CpuUtils {
         "Unknown"
     }
 
-    /**
-     * Mengambil model Chipset (misal: SM8550, MT6893, Exynos 2200)
-     */
     fun getSocModel(): String = runCatching {
-        // Build.SOC_MODEL tersedia mulai API 31
         val model = Build.SOC_MODEL
         if (model != Build.UNKNOWN) {
             model.uppercase()
@@ -38,9 +30,6 @@ object CpuUtils {
         "Unknown"
     }
 
-    /**
-     * Mengambil jumlah inti (Cores) prosesor yang tersedia
-     */
     fun getCoreCount(): Int = runCatching {
         Runtime.getRuntime().availableProcessors()
     }.getOrElse {
