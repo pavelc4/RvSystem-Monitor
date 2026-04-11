@@ -26,7 +26,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProgressIndicatorDefaults
@@ -40,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
@@ -627,22 +627,14 @@ fun MemoryCard(ram: RAM, zram: ZRAM, isZramActive: Boolean = false) {
         }
     }
 
-    val ramTargetProgress = if (ram.usedPercentage.isNaN()) {
-        0f
-    } else {
-        (ram.usedPercentage.toFloat() / 100f)
-    }
+    val ramTargetProgress = if (ram.usedPercentage.isNaN()) 0f else (ram.usedPercentage.toFloat() / 100f)
     val ramAnimatedProgress by animateFloatAsState(
         targetValue = ramTargetProgress,
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
         label = "RAM Progress Animation",
     )
 
-    val zramTargetProgress = if (zram.usedPercentage.isNaN()) {
-        0f
-    } else {
-        (zram.usedPercentage.toFloat() / 100f)
-    }
+    val zramTargetProgress = if (zram.usedPercentage.isNaN()) 0f else (zram.usedPercentage.toFloat() / 100f)
     val zramAnimatedProgress by animateFloatAsState(
         targetValue = zramTargetProgress,
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
@@ -650,80 +642,65 @@ fun MemoryCard(ram: RAM, zram: ZRAM, isZramActive: Boolean = false) {
     )
 
     Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
-        shape = MaterialTheme.shapes.largeIncreased,
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Icon(
-                    painter = painterResource(materialsymbols_ic_memory_alt_rounded_filled),
-                    contentDescription = null,
-                )
-                Text(
-                    text = "Memory",
-                    style = MaterialTheme.typography.titleLarge,
-                )
-            }
-            HorizontalDivider(
-                thickness = 2.dp,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Icon(
+                painter = painterResource(id = materialsymbols_ic_memory_alt_rounded_filled),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .size(160.dp)
+                    .offset(y = 30.dp)
+                    .alpha(0.20f)
             )
-            Row(
-                modifier = Modifier.height(IntrinsicSize.Min),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
-                CircularWavyProgressIndicator(
-                    progress = { ramAnimatedProgress },
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    stroke = customStroke,
-                    trackStroke = customStroke,
-                    wavelength = 25.dp,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .aspectRatio(1f),
-                )
-                Column {
-                    Text(
-                        text = "Total RAM: ${ram.total} GB",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        text = "Available RAM: ${ram.available} GB",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        text = "Used RAM: ${ram.used} GB (${ram.usedPercentage}%)",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                }
-            }
-            if (isZramActive) {
-                HorizontalDivider(
-                    thickness = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
                 Row(
-                    modifier = Modifier.height(IntrinsicSize.Min),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    CircularWavyProgressIndicator(
-                        progress = { zramAnimatedProgress },
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.primary)
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            painter = painterResource(id = materialsymbols_ic_memory_alt_rounded_filled),
+                            contentDescription = "Memory Icon",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                        )
+                    }
+
+                    Text(
+                        text = "Memory",
+                        style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.height(IntrinsicSize.Min),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    CircularWavyProgressIndicator(
+                        progress = { ramAnimatedProgress },
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
                         stroke = customStroke,
                         trackStroke = customStroke,
                         wavelength = 25.dp,
@@ -731,22 +708,103 @@ fun MemoryCard(ram: RAM, zram: ZRAM, isZramActive: Boolean = false) {
                             .fillMaxHeight()
                             .aspectRatio(1f),
                     )
-                    Column {
-                        Text(
-                            text = "Total ZRAM: ${zram.total} GB",
-                            style = MaterialTheme.typography.bodyLarge,
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column {
+                            Text(
+                                text = "RAM",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = "${ram.used} / ${ram.total} GB",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            BadgeChip(
+                                text = "${ram.usedPercentage}%",
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                textColor = MaterialTheme.colorScheme.onSecondary
+                            )
+                            BadgeChip(
+                                text = "${ram.available} GB Free",
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                textColor = MaterialTheme.colorScheme.onTertiary
+                            )
+                        }
+                    }
+                }
+
+                if (isZramActive) {
+                    Row(
+                        modifier = Modifier.height(IntrinsicSize.Min),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        CircularWavyProgressIndicator(
+                            progress = { zramAnimatedProgress },
+                            color = MaterialTheme.colorScheme.secondary,
+                            trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
+                            stroke = customStroke,
+                            trackStroke = customStroke,
+                            wavelength = 25.dp,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .aspectRatio(1f),
                         )
-                        Text(
-                            text = "Available ZRAM: ${zram.available} GB",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                        Text(
-                            text = "Used ZRAM: ${zram.used} GB (${zram.usedPercentage}%)",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
+
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Column {
+                                Text(
+                                    text = "ZRAM",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Text(
+                                    text = "${zram.used} / ${zram.total} GB",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
+
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                BadgeChip(
+                                    text = "${zram.usedPercentage}%",
+                                    containerColor = MaterialTheme.colorScheme.secondary,
+                                    textColor = MaterialTheme.colorScheme.onSecondary
+                                )
+                                BadgeChip(
+                                    text = "${zram.available} GB Free",
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    textColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BadgeChip(text: String, containerColor: Color, textColor: Color) {
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(containerColor)
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = textColor,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
