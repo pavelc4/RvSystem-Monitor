@@ -16,12 +16,13 @@ import androidx.compose.ui.unit.dp
 import com.rve.systemmonitor.ui.components.AppBars.SimpleTopAppBar
 
 @Composable
-fun RAMScreen() {
+fun RAMScreen(onNavigateToSettings: () -> Unit) {
     Scaffold(
         topBar = {
             SimpleTopAppBar(
                 title = "RvSystem Monitor",
                 subtitle = "RAM",
+                onNavigateToSettings = onNavigateToSettings,
             )
         },
     ) { innerPadding ->

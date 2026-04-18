@@ -67,10 +67,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.icons.material.symbols.rounded.android)
     implementation(libs.icons.material.symbols.rounded.filled.android)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.backdrop)
+    implementation(libs.androidx.datastore.preferences)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -90,7 +92,7 @@ tasks.register<Exec>("buildRustLibraries") {
         "-t", "armeabi-v7a",
         "-t", "arm64-v8a",
         "-o", "../app/src/main/jniLibs",
-        "build", "--release"
+        "build", "--release",
     )
 }
 

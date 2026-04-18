@@ -33,7 +33,7 @@ import com.rve.systemmonitor.ui.screens.RAMScreen
 import kotlinx.coroutines.launch
 
 @Composable
-fun RvSystemMonitorApp() {
+fun RvSystemMonitorApp(onNavigateToSettings: () -> Unit) {
     val pagerState = rememberPagerState(pageCount = { 4 })
     val coroutineScope = rememberCoroutineScope()
 
@@ -85,10 +85,10 @@ fun RvSystemMonitorApp() {
             beyondViewportPageCount = 1,
         ) { page ->
             when (page) {
-                0 -> HomeScreen()
-                1 -> CPUScreen()
-                2 -> RAMScreen()
-                3 -> ProcessesScreen()
+                0 -> HomeScreen(onNavigateToSettings = onNavigateToSettings)
+                1 -> CPUScreen(onNavigateToSettings = onNavigateToSettings)
+                2 -> RAMScreen(onNavigateToSettings = onNavigateToSettings)
+                3 -> ProcessesScreen(onNavigateToSettings = onNavigateToSettings)
             }
         }
 

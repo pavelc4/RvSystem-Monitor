@@ -67,7 +67,10 @@ import com.rve.systemmonitor.ui.data.ZRAM
 import com.rve.systemmonitor.ui.viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(
+    viewModel: HomeViewModel = viewModel(),
+    onNavigateToSettings: () -> Unit,
+) {
     val device by viewModel.device.collectAsStateWithLifecycle()
     val os by viewModel.os.collectAsStateWithLifecycle()
     val display by viewModel.display.collectAsStateWithLifecycle()
@@ -81,6 +84,7 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
             SimpleTopAppBar(
                 title = "RvSystem Monitor",
                 subtitle = "Home",
+                onNavigateToSettings = onNavigateToSettings,
             )
         },
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -291,7 +295,7 @@ fun OSCard(os: OS) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Box(
                         modifier = Modifier
@@ -397,7 +401,7 @@ fun DisplayCard(display: Display) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Box(
                         modifier = Modifier
@@ -594,7 +598,7 @@ fun GPUCard(gpu: GPU) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
                     Box(
                         modifier = Modifier
@@ -659,7 +663,7 @@ fun MemoryCard(ram: RAM, zram: ZRAM, isZramActive: Boolean = false) {
                     .align(Alignment.BottomEnd)
                     .size(160.dp)
                     .offset(y = 30.dp)
-                    .alpha(0.20f)
+                    .alpha(0.20f),
             )
 
             Column(
@@ -728,12 +732,12 @@ fun MemoryCard(ram: RAM, zram: ZRAM, isZramActive: Boolean = false) {
                             BadgeChip(
                                 text = "${ram.usedPercentage}%",
                                 containerColor = MaterialTheme.colorScheme.secondary,
-                                textColor = MaterialTheme.colorScheme.onSecondary
+                                textColor = MaterialTheme.colorScheme.onSecondary,
                             )
                             BadgeChip(
                                 text = "${ram.available} GB Free",
                                 containerColor = MaterialTheme.colorScheme.tertiary,
-                                textColor = MaterialTheme.colorScheme.onTertiary
+                                textColor = MaterialTheme.colorScheme.onTertiary,
                             )
                         }
                     }
@@ -776,12 +780,12 @@ fun MemoryCard(ram: RAM, zram: ZRAM, isZramActive: Boolean = false) {
                                 BadgeChip(
                                     text = "${zram.usedPercentage}%",
                                     containerColor = MaterialTheme.colorScheme.secondary,
-                                    textColor = MaterialTheme.colorScheme.onSecondary
+                                    textColor = MaterialTheme.colorScheme.onSecondary,
                                 )
                                 BadgeChip(
                                     text = "${zram.available} GB Free",
                                     containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    textColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
                         }

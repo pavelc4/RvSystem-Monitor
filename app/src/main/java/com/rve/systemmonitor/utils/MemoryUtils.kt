@@ -28,7 +28,7 @@ object MemoryUtils {
             total = data[0],
             available = data[1],
             used = data[2],
-            usedPercentage = data[3]
+            usedPercentage = data[3],
         )
     }.getOrElse {
         Log.e(TAG, "getRamData: ${it.message}", it)
@@ -43,7 +43,7 @@ object MemoryUtils {
             total = data[1],
             available = data[2],
             used = data[3],
-            usedPercentage = data[4]
+            usedPercentage = data[4],
         )
     }.getOrElse {
         Log.e(TAG, "getZramData: ${it.message}", it)
