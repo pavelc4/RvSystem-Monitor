@@ -4,14 +4,14 @@ use jni::JNIEnv;
 use jni::objects::JClass;
 use jni::sys::jdoubleArray;
 
-mod memory_utils;
+pub mod mm;
 
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_com_rve_systemmonitor_utils_MemoryUtils_getRamDataNative<'local>(
     env: JNIEnv<'local>,
     _class: JClass<'local>,
 ) -> jdoubleArray {
-    let (ram, _) = memory_utils::get_memory_data();
+    let (ram, _) = mm::memory::get_memory_data();
 
     let data = [ram.total, ram.available, ram.used, ram.used_percentage];
 
@@ -26,7 +26,7 @@ pub extern "system" fn Java_com_rve_systemmonitor_utils_MemoryUtils_getZramDataN
     env: JNIEnv<'local>,
     _class: JClass<'local>,
 ) -> jdoubleArray {
-    let (_, zram) = memory_utils::get_memory_data();
+    let (_, zram) = mm::memory::get_memory_data();
 
     let is_active = if zram.is_active { 1.0 } else { 0.0 };
     let data = [is_active, zram.total, zram.available, zram.used, zram.used_percentage];
