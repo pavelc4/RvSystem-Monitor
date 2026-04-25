@@ -26,11 +26,7 @@ import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsy
 
 object AppBars {
     @Composable
-    fun SimpleTopAppBar(
-        title: String,
-        subtitle: String,
-        onNavigateToSettings: () -> Unit,
-    ) {
+    fun SimpleTopAppBar(title: String, subtitle: String, onNavigateToSettings: () -> Unit) {
         TopAppBar(
             title = {
                 Text(
@@ -76,11 +72,7 @@ object AppBars {
 }
 
 @Composable
-fun ExitUntilCollapsedMediumTopAppBar(
-    title: String,
-    onNavigateBack: () -> Unit,
-    scrollBehavior: TopAppBarScrollBehavior
-) {
+fun ExitUntilCollapsedMediumTopAppBar(title: String, onNavigateBack: () -> Unit, scrollBehavior: TopAppBarScrollBehavior) {
     MediumTopAppBar(
         title = {
             Text(

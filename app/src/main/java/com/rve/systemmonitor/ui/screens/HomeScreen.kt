@@ -67,10 +67,7 @@ import com.rve.systemmonitor.ui.data.ZRAM
 import com.rve.systemmonitor.ui.viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen(
-    viewModel: HomeViewModel = viewModel(),
-    onNavigateToSettings: () -> Unit,
-) {
+fun HomeScreen(viewModel: HomeViewModel = viewModel(), onNavigateToSettings: () -> Unit) {
     val device by viewModel.device.collectAsStateWithLifecycle()
     val os by viewModel.os.collectAsStateWithLifecycle()
     val display by viewModel.display.collectAsStateWithLifecycle()
