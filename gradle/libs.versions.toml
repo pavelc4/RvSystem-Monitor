@@ -14,6 +14,7 @@ material3 = "1.5.0-alpha17"
 composeIcons = "2.2.1"
 materialIconsExtended = "1.7.8"
 navigation = "2.10.0-alpha02"
+splashscreen = "1.2.0"
 spotless = "8.4.0"
 hilt = "2.59.2"
 ksp = "2.3.7"
@@ -26,6 +27,7 @@ backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
