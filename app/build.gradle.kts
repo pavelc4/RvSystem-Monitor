@@ -18,7 +18,7 @@ android {
     defaultConfig {
         applicationId = "com.rve.systemmonitor"
         minSdk = 34
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
         ndkVersion = "30.0.14904198"
