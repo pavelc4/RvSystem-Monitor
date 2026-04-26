@@ -64,11 +64,20 @@ import com.rve.systemmonitor.domain.model.OS
 import com.rve.systemmonitor.domain.model.RAM
 import com.rve.systemmonitor.domain.model.ZRAM
 import com.rve.systemmonitor.ui.components.AppBars.SimpleTopAppBar
+import com.rve.systemmonitor.ui.viewmodel.HomeUiState
 import com.rve.systemmonitor.ui.viewmodel.HomeViewModel
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onNavigateToSettings: () -> Unit) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+fun HomeScreen(
+    isActive: Boolean,
+    viewModel: HomeViewModel = hiltViewModel(),
+    onNavigateToSettings: () -> Unit
+) {
+    val uiState by if (isActive) {
+        viewModel.uiState.collectAsStateWithLifecycle()
+    } else {
+        remember { viewModel.uiState }.collectAsStateWithLifecycle(HomeUiState())
+    }
 
     Scaffold(
         topBar = {

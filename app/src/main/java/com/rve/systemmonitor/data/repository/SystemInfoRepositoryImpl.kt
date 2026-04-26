@@ -1,6 +1,8 @@
 package com.rve.systemmonitor.data.repository
 
 import android.app.Application
+import android.util.Log
+import com.rve.systemmonitor.BuildConfig
 import com.rve.systemmonitor.domain.model.CPU
 import com.rve.systemmonitor.domain.model.Device
 import com.rve.systemmonitor.domain.model.Display
@@ -18,13 +20,16 @@ import com.rve.systemmonitor.utils.OSUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class SystemInfoRepositoryImpl @Inject constructor(
-    private val application: Application
+    private val application: Application,
 ) : SystemInfoRepository {
+    private val TAG = "SystemInfoRepository"
 
     override fun getDeviceInfo(): Device {
         return Device(
@@ -59,6 +64,51 @@ class SystemInfoRepositoryImpl @Inject constructor(
             model = CpuUtils.getSocModel(),
             cores = CpuUtils.getCoreCount(),
         )
+    }
+
+    override fun getCpuStream(): Flow<CPU> = flow {
+        if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Started")
+        
+        val manufacturer = CpuUtils.getSocManufacturer()
+        val model = CpuUtils.getSocModel()
+        val cores = CpuUtils.getCoreCount()
+
+        // Fetch static min/max frequencies and governor once
+        val staticCoreInfo = (0 until cores).map { i ->
+            val min = CpuUtils.getCoreFrequency(i, "min_info")
+            val max = CpuUtils.getCoreFrequency(i, "max_info")
+            val governor = CpuUtils.getCoreGovernor(i)
+            Triple(min, max, governor)
+        }
+
+        while (true) {
+            if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Updated")
+            val coreDetails = mutableListOf<com.rve.systemmonitor.domain.model.CoreDetail>()
+
+            for (i in 0 until cores) {
+                coreDetails.add(
+                    com.rve.systemmonitor.domain.model.CoreDetail(
+                        id = i,
+                        currentFreq = CpuUtils.getCoreFrequency(i, "cur"),
+                        minFreq = staticCoreInfo[i].first,
+                        maxFreq = staticCoreInfo[i].second,
+                        governor = staticCoreInfo[i].third
+                    ),
+                )
+            }
+
+            emit(
+                CPU(
+                    manufacturer = manufacturer,
+                    model = model,
+                    cores = cores,
+                    coreDetails = coreDetails,
+                ),
+            )
+            delay(3000L)
+        }
+    }.onCompletion {
+        if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Stopped")
     }
 
     override suspend fun getGpuInfo(): GPU {

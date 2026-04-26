@@ -82,11 +82,17 @@ fun RvSystemMonitorApp(onNavigateToSettings: () -> Unit) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.layerBackdrop(backdrop),
-            beyondViewportPageCount = 1,
+            beyondViewportPageCount = 0,
         ) { page ->
             when (page) {
-                0 -> HomeScreen(onNavigateToSettings = onNavigateToSettings)
-                1 -> CPUScreen(onNavigateToSettings = onNavigateToSettings)
+                0 -> HomeScreen(
+                    isActive = pagerState.settledPage == 0,
+                    onNavigateToSettings = onNavigateToSettings
+                )
+                1 -> CPUScreen(
+                    isActive = pagerState.settledPage == 1,
+                    onNavigateToSettings = onNavigateToSettings
+                )
                 2 -> RAMScreen(onNavigateToSettings = onNavigateToSettings)
                 3 -> ProcessesScreen(onNavigateToSettings = onNavigateToSettings)
             }
