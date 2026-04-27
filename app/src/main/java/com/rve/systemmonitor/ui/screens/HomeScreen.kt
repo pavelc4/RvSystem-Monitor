@@ -73,10 +73,11 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToSettings: () -> Unit
 ) {
+    val initialUiState = remember { viewModel.uiState.value }
     val uiState by if (isActive) {
         viewModel.uiState.collectAsStateWithLifecycle()
     } else {
-        remember { viewModel.uiState }.collectAsStateWithLifecycle(HomeUiState())
+        remember { kotlinx.coroutines.flow.emptyFlow<HomeUiState>() }.collectAsStateWithLifecycle(initialUiState)
     }
 
     Scaffold(

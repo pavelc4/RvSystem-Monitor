@@ -15,6 +15,6 @@ interface SystemInfoRepository {
     fun getDisplayInfo(): Display
     fun getCpuInfo(): CPU
     fun getCpuStream(): Flow<CPU>
-    suspend fun getGpuInfo(): GPU
+    fun getGpuInfo(): GPU
     fun getMemoryInfo(): Flow<Pair<RAM, ZRAM>>
 }

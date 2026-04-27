@@ -50,10 +50,11 @@ fun CPUScreen(
     viewModel: CPUViewModel = hiltViewModel(),
     onNavigateToSettings: () -> Unit
 ) {
+    val initialCpuInfo = remember { viewModel.cpuInfo.value }
     val cpuInfo by if (isActive) {
         viewModel.cpuInfo.collectAsStateWithLifecycle()
     } else {
-        remember { viewModel.cpuInfo }.collectAsStateWithLifecycle(CPU())
+        remember { kotlinx.coroutines.flow.emptyFlow<CPU>() }.collectAsStateWithLifecycle(initialCpuInfo)
     }
 
     Scaffold(

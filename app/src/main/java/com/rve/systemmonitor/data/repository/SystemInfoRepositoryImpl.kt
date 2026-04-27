@@ -73,7 +73,6 @@ class SystemInfoRepositoryImpl @Inject constructor(
         val model = CpuUtils.getSocModel()
         val cores = CpuUtils.getCoreCount()
 
-        // Fetch static min/max frequencies and governor once
         val staticCoreInfo = (0 until cores).map { i ->
             val min = CpuUtils.getCoreFrequency(i, "min_info")
             val max = CpuUtils.getCoreFrequency(i, "max_info")
@@ -111,7 +110,7 @@ class SystemInfoRepositoryImpl @Inject constructor(
         if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Stopped")
     }
 
-    override suspend fun getGpuInfo(): GPU {
+    override fun getGpuInfo(): GPU {
         val (renderer, vendor) = GpuUtils.getGpuDetails()
         return GPU(
             renderer = renderer,
@@ -121,11 +120,15 @@ class SystemInfoRepositoryImpl @Inject constructor(
     }
 
     override fun getMemoryInfo(): Flow<Pair<RAM, ZRAM>> = flow {
+        if (BuildConfig.DEBUG) Log.d(TAG, "Memory Stream Started")
         while (true) {
+            if (BuildConfig.DEBUG) Log.d(TAG, "Memory Stream Updated")
             val ram = MemoryUtils.getRamData()
             val zram = MemoryUtils.getZramData()
             emit(ram to zram)
             delay(2000L)
         }
+    }.onCompletion {
+        if (BuildConfig.DEBUG) Log.d(TAG, "Memory Stream Stopped")
     }
 }
