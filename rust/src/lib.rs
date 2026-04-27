@@ -20,9 +20,19 @@ pub extern "system" fn Java_com_rve_systemmonitor_utils_MemoryUtils_getRamDataNa
 ) -> jdoubleArray {
     let (ram, _) = mm::memory::get_memory_data();
 
-    let data = [ram.total, ram.available, ram.used, ram.used_percentage];
+    let data = [
+        ram.total,
+        ram.available,
+        ram.used,
+        ram.used_percentage,
+        ram.cached,
+        ram.buffers,
+        ram.active,
+        ram.inactive,
+        ram.slab,
+    ];
 
-    let output = env.new_double_array(4).unwrap();
+    let output = env.new_double_array(9).unwrap();
     env.set_double_array_region(&output, 0, &data).unwrap();
 
     output.into_raw()

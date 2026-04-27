@@ -48,6 +48,8 @@ import com.rve.systemmonitor.domain.model.ZRAM
 import com.rve.systemmonitor.ui.viewmodel.MemoryUiState
 import com.rve.systemmonitor.ui.viewmodel.MemoryViewModel
 
+import java.util.Locale
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MemoryScreen(isActive: Boolean, viewModel: MemoryViewModel = hiltViewModel()) {
@@ -74,6 +76,97 @@ fun MemoryScreen(isActive: Boolean, viewModel: MemoryViewModel = hiltViewModel()
                 zram = uiState.zram,
             )
         }
+
+        item {
+            DetailedMemoryCard(ram = uiState.ram)
+        }
+    }
+}
+
+@Composable
+private fun DetailedMemoryCard(ram: RAM) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = "Detailed Breakdown",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            MemoryDetailItem(
+                label = "Cached",
+                value = formatMemoryValue(ram.cached),
+                modifier = Modifier.weight(1f),
+            )
+            MemoryDetailItem(
+                label = "Buffers",
+                value = formatMemoryValue(ram.buffers),
+                modifier = Modifier.weight(1f),
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            MemoryDetailItem(
+                label = "Active",
+                value = formatMemoryValue(ram.active),
+                modifier = Modifier.weight(1f),
+            )
+            MemoryDetailItem(
+                label = "Inactive",
+                value = formatMemoryValue(ram.inactive),
+                modifier = Modifier.weight(1f),
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            MemoryDetailItem(
+                label = "Slab",
+                value = formatMemoryValue(ram.slab),
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+private fun formatMemoryValue(valueInGb: Double): String {
+    return if (valueInGb < 1.0) {
+        val valueInMb = valueInGb * 1024.0
+        "${String.format(Locale.getDefault(), "%.2f", valueInMb)} MB"
+    } else {
+        "${String.format(Locale.getDefault(), "%.2f", valueInGb)} GB"
+    }
+}
+
+@Composable
+private fun MemoryDetailItem(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.tertiaryContainer)
+            .padding(12.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onTertiaryContainer,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 

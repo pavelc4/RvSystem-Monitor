@@ -20,6 +20,16 @@ pub struct RamData {
     pub used: f64,
     /// Percentage of RAM used.
     pub used_percentage: f64,
+    /// Cached RAM in GB.
+    pub cached: f64,
+    /// Buffers in GB.
+    pub buffers: f64,
+    /// Active RAM in GB.
+    pub active: f64,
+    /// Inactive RAM in GB.
+    pub inactive: f64,
+    /// Slab in GB.
+    pub slab: f64,
 }
 
 /// Represents ZRAM (Compressed RAM) usage data.
@@ -59,6 +69,11 @@ pub fn get_memory_data() -> (RamData, ZramData) {
     let mut mem_available_bytes = 0_f64;
     let mut swap_total_bytes = 0_f64;
     let mut swap_free_bytes = 0_f64;
+    let mut cached_bytes = 0_f64;
+    let mut buffers_bytes = 0_f64;
+    let mut active_bytes = 0_f64;
+    let mut inactive_bytes = 0_f64;
+    let mut slab_bytes = 0_f64;
 
     if let Ok(lines) = read_lines("/proc/meminfo") {
         for line in lines.flatten() {
@@ -73,6 +88,11 @@ pub fn get_memory_data() -> (RamData, ZramData) {
                     "MemAvailable:" => mem_available_bytes = val_bytes,
                     "SwapTotal:" => swap_total_bytes = val_bytes,
                     "SwapFree:" => swap_free_bytes = val_bytes,
+                    "Cached:" => cached_bytes = val_bytes,
+                    "Buffers:" => buffers_bytes = val_bytes,
+                    "Active:" => active_bytes = val_bytes,
+                    "Inactive:" => inactive_bytes = val_bytes,
+                    "Slab:" => slab_bytes = val_bytes,
                     _ => {}
                 }
             }
@@ -93,6 +113,11 @@ pub fn get_memory_data() -> (RamData, ZramData) {
         available: format_to_two_decimals(mem_available_bytes / GB_FACTOR),
         used: format_to_two_decimals(ram_used_bytes / GB_FACTOR),
         used_percentage: format_to_two_decimals(ram_percentage),
+        cached: format_to_two_decimals(cached_bytes / GB_FACTOR),
+        buffers: format_to_two_decimals(buffers_bytes / GB_FACTOR),
+        active: format_to_two_decimals(active_bytes / GB_FACTOR),
+        inactive: format_to_two_decimals(inactive_bytes / GB_FACTOR),
+        slab: format_to_two_decimals(slab_bytes / GB_FACTOR),
     };
 
     let swap_used_bytes = swap_total_bytes - swap_free_bytes;

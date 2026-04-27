@@ -29,6 +29,11 @@ object MemoryUtils {
             available = data[1],
             used = data[2],
             usedPercentage = data[3],
+            cached = data[4],
+            buffers = data[5],
+            active = data[6],
+            inactive = data[7],
+            slab = data[8],
         )
     }.getOrElse {
         Log.e(TAG, "getRamData: ${it.message}", it)
