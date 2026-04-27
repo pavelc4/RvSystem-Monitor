@@ -48,6 +48,11 @@ import com.rve.systemmonitor.domain.model.ZRAM
 import com.rve.systemmonitor.ui.viewmodel.MemoryUiState
 import com.rve.systemmonitor.ui.viewmodel.MemoryViewModel
 
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -58,6 +63,16 @@ fun MemoryScreen(isActive: Boolean, viewModel: MemoryViewModel = hiltViewModel()
         viewModel.uiState.collectAsStateWithLifecycle()
     } else {
         remember { kotlinx.coroutines.flow.emptyFlow<MemoryUiState>() }.collectAsStateWithLifecycle(initialUiState)
+    }
+
+    var selectedDetail by remember { mutableStateOf<Pair<String, String>?>(null) }
+
+    if (selectedDetail != null) {
+        MemoryInfoDialog(
+            title = selectedDetail!!.first,
+            description = selectedDetail!!.second,
+            onDismiss = { selectedDetail = null },
+        )
     }
 
     LazyColumn(
@@ -78,13 +93,18 @@ fun MemoryScreen(isActive: Boolean, viewModel: MemoryViewModel = hiltViewModel()
         }
 
         item {
-            DetailedMemoryCard(ram = uiState.ram)
+            DetailedMemoryCard(
+                ram = uiState.ram,
+                onItemClick = { label, description ->
+                    selectedDetail = label to description
+                },
+            )
         }
     }
 }
 
 @Composable
-private fun DetailedMemoryCard(ram: RAM) {
+private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -102,11 +122,15 @@ private fun DetailedMemoryCard(ram: RAM) {
             MemoryDetailItem(
                 label = "Cached",
                 value = formatMemoryValue(ram.cached),
+                description = "Memory used for the file system cache to speed up file access. This memory can be reclaimed by the system if needed.",
+                onItemClick = onItemClick,
                 modifier = Modifier.weight(1f),
             )
             MemoryDetailItem(
                 label = "Buffers",
                 value = formatMemoryValue(ram.buffers),
+                description = "Memory used for raw disk blocks and metadata. Usually very small on Android devices.",
+                onItemClick = onItemClick,
                 modifier = Modifier.weight(1f),
             )
         }
@@ -118,25 +142,26 @@ private fun DetailedMemoryCard(ram: RAM) {
             MemoryDetailItem(
                 label = "Active",
                 value = formatMemoryValue(ram.active),
+                description = "Memory that is currently being used or has been used very recently. This memory is unlikely to be reclaimed soon.",
+                onItemClick = onItemClick,
                 modifier = Modifier.weight(1f),
             )
             MemoryDetailItem(
                 label = "Inactive",
                 value = formatMemoryValue(ram.inactive),
+                description = "Memory that has not been used for a while. It is a prime candidate for being moved to Swap/ZRAM or reclaimed.",
+                onItemClick = onItemClick,
                 modifier = Modifier.weight(1f),
             )
         }
 
-        Row(
+        MemoryDetailItem(
+            label = "Slab",
+            value = formatMemoryValue(ram.slab),
+            description = "Memory used by the kernel's internal data structures and objects.",
+            onItemClick = onItemClick,
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            MemoryDetailItem(
-                label = "Slab",
-                value = formatMemoryValue(ram.slab),
-                modifier = Modifier.weight(1f),
-            )
-        }
+        )
     }
 }
 
@@ -150,11 +175,36 @@ private fun formatMemoryValue(valueInGb: Double): String {
 }
 
 @Composable
-private fun MemoryDetailItem(label: String, value: String, modifier: Modifier = Modifier) {
+private fun MemoryInfoDialog(title: String, description: String, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(text = title, style = MaterialTheme.typography.headlineSmall)
+        },
+        text = {
+            Text(text = description, style = MaterialTheme.typography.bodyMedium)
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        },
+    )
+}
+
+@Composable
+private fun MemoryDetailItem(
+    label: String,
+    value: String,
+    description: String,
+    onItemClick: (String, String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.tertiaryContainer)
+            .clickable { onItemClick(label, description) }
             .padding(12.dp),
     ) {
         Text(
