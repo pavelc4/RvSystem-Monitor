@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -14,6 +15,7 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 class SettingsPreferences(private val context: Context) {
     companion object {
         val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
+        val CPU_REFRESH_DELAY_KEY = longPreferencesKey("cpu_refresh_delay")
     }
 
     val themeModeFlow: Flow<ThemeMode> = context.dataStore.data
@@ -22,9 +24,20 @@ class SettingsPreferences(private val context: Context) {
             ThemeMode.valueOf(mode)
         }
 
+    val cpuRefreshDelayFlow: Flow<Long> = context.dataStore.data
+        .map { preferences ->
+            preferences[CPU_REFRESH_DELAY_KEY] ?: 3000L
+        }
+
     suspend fun saveThemeMode(mode: ThemeMode) {
         context.dataStore.edit { preferences ->
             preferences[THEME_MODE_KEY] = mode.name
+        }
+    }
+
+    suspend fun saveCpuRefreshDelay(delayMillis: Long) {
+        context.dataStore.edit { preferences ->
+            preferences[CPU_REFRESH_DELAY_KEY] = delayMillis
         }
     }
 }

@@ -21,9 +21,22 @@ class SettingsViewModel @Inject constructor(private val settingsRepository: Sett
             initialValue = ThemeMode.SYSTEM,
         )
 
+    val cpuRefreshDelay: StateFlow<Long> = settingsRepository.cpuRefreshDelay
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 3000L,
+        )
+
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch {
             settingsRepository.setThemeMode(mode)
+        }
+    }
+
+    fun setCpuRefreshDelay(delayMillis: Long) {
+        viewModelScope.launch {
+            settingsRepository.setCpuRefreshDelay(delayMillis)
         }
     }
 }

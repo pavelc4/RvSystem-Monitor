@@ -10,6 +10,7 @@ import com.rve.systemmonitor.domain.model.GPU
 import com.rve.systemmonitor.domain.model.OS
 import com.rve.systemmonitor.domain.model.RAM
 import com.rve.systemmonitor.domain.model.ZRAM
+import com.rve.systemmonitor.domain.repository.SettingsRepository
 import com.rve.systemmonitor.domain.repository.SystemInfoRepository
 import com.rve.systemmonitor.utils.CpuUtils
 import com.rve.systemmonitor.utils.DeviceUtils
@@ -19,13 +20,17 @@ import com.rve.systemmonitor.utils.MemoryUtils
 import com.rve.systemmonitor.utils.OSUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onCompletion
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SystemInfoRepositoryImpl @Inject constructor(private val application: Application) : SystemInfoRepository {
+class SystemInfoRepositoryImpl @Inject constructor(
+    private val application: Application,
+    private val settingsRepository: SettingsRepository,
+) : SystemInfoRepository {
     private val TAG = "SystemInfoRepository"
 
     override fun getDeviceInfo(): Device {
@@ -66,54 +71,57 @@ class SystemInfoRepositoryImpl @Inject constructor(private val application: Appl
         )
     }
 
-    override fun getCpuStream(): Flow<CPU> = flow {
-        if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Started")
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    override fun getCpuStream(): Flow<CPU> = settingsRepository.cpuRefreshDelay.flatMapLatest { delayMillis ->
+        flow {
+            if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Started with delay: $delayMillis")
 
-        val manufacturer = CpuUtils.getSocManufacturer()
-        val model = CpuUtils.getSocModel()
-        val cores = CpuUtils.getCoreCount()
-        val hardware = CpuUtils.getHardware()
-        val board = CpuUtils.getBoard()
-        val architecture = CpuUtils.getArchitecture()
+            val manufacturer = CpuUtils.getSocManufacturer()
+            val model = CpuUtils.getSocModel()
+            val cores = CpuUtils.getCoreCount()
+            val hardware = CpuUtils.getHardware()
+            val board = CpuUtils.getBoard()
+            val architecture = CpuUtils.getArchitecture()
 
-        val staticCoreInfo = (0 until cores).map { i ->
-            val min = CpuUtils.getCoreFrequency(i, "min_info")
-            val max = CpuUtils.getCoreFrequency(i, "max_info")
-            val governor = CpuUtils.getCoreGovernor(i)
-            Triple(min, max, governor)
-        }
-
-        while (true) {
-            if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Updated")
-            val coreDetails = mutableListOf<com.rve.systemmonitor.domain.model.CoreDetail>()
-
-            for (i in 0 until cores) {
-                coreDetails.add(
-                    com.rve.systemmonitor.domain.model.CoreDetail(
-                        id = i,
-                        currentFreq = CpuUtils.getCoreFrequency(i, "cur"),
-                        minFreq = staticCoreInfo[i].first,
-                        maxFreq = staticCoreInfo[i].second,
-                        governor = staticCoreInfo[i].third,
-                    ),
-                )
+            val staticCoreInfo = (0 until cores).map { i ->
+                val min = CpuUtils.getCoreFrequency(i, "min_info")
+                val max = CpuUtils.getCoreFrequency(i, "max_info")
+                val governor = CpuUtils.getCoreGovernor(i)
+                Triple(min, max, governor)
             }
 
-            emit(
-                CPU(
-                    manufacturer = manufacturer,
-                    model = model,
-                    cores = cores,
-                    hardware = hardware,
-                    board = board,
-                    architecture = architecture,
-                    coreDetails = coreDetails,
-                ),
-            )
-            delay(3000L)
+            while (true) {
+                if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Updated")
+                val coreDetails = mutableListOf<com.rve.systemmonitor.domain.model.CoreDetail>()
+
+                for (i in 0 until cores) {
+                    coreDetails.add(
+                        com.rve.systemmonitor.domain.model.CoreDetail(
+                            id = i,
+                            currentFreq = CpuUtils.getCoreFrequency(i, "cur"),
+                            minFreq = staticCoreInfo[i].first,
+                            maxFreq = staticCoreInfo[i].second,
+                            governor = staticCoreInfo[i].third,
+                        ),
+                    )
+                }
+
+                emit(
+                    CPU(
+                        manufacturer = manufacturer,
+                        model = model,
+                        cores = cores,
+                        hardware = hardware,
+                        board = board,
+                        architecture = architecture,
+                        coreDetails = coreDetails,
+                    ),
+                )
+                delay(delayMillis)
+            }
+        }.onCompletion {
+            if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Stopped")
         }
-    }.onCompletion {
-        if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Stopped")
     }
 
     override fun getGpuInfo(): GPU {
