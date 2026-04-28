@@ -1,5 +1,6 @@
 package com.rve.systemmonitor.utils
 
+import android.annotation.SuppressLint
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -67,6 +68,7 @@ object BatteryUtils {
         return intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1) / 10f
     }
 
+    @SuppressLint("PrivateApi")
     fun getCapacity(context: Context): Double {
         val powerProfileClass = "com.android.internal.os.PowerProfile"
         return try {
