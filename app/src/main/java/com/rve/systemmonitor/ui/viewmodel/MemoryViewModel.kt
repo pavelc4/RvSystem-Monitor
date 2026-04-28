@@ -26,7 +26,7 @@ class MemoryViewModel @Inject constructor(private val systemInfoRepository: Syst
         )
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(0),
+        started = SharingStarted.WhileSubscribed(5000),
         initialValue = MemoryUiState(),
     )
 

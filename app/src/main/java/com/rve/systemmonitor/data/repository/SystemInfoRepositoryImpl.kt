@@ -22,10 +22,12 @@ import com.rve.systemmonitor.utils.OSUtils
 import com.rve.systemmonitor.utils.StorageUtils
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onCompletion
 
 @Singleton
@@ -123,7 +125,7 @@ class SystemInfoRepositoryImpl @Inject constructor(
             }
         }.onCompletion {
             if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Stopped")
-        }
+        }.flowOn(Dispatchers.IO)
     }
 
     override fun getGpuInfo(): GPU {
@@ -148,7 +150,7 @@ class SystemInfoRepositoryImpl @Inject constructor(
             }
         }.onCompletion {
             if (BuildConfig.DEBUG) Log.d(TAG, "Memory Stream Stopped")
-        }
+        }.flowOn(Dispatchers.IO)
     }
 
     override fun getStorageInfo(): Storage {

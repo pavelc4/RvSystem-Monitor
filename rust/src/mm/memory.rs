@@ -61,6 +61,14 @@ where
     Ok(io::BufReader::new(file).lines())
 }
 
+/// Helper to parse the KB value from a meminfo line without extra allocations
+fn parse_kb(line: &str) -> f64 {
+    line.split_whitespace()
+        .nth(1)
+        .and_then(|s| s.parse::<f64>().ok())
+        .unwrap_or(0.0)
+}
+
 /// Retrieves memory data by parsing `/proc/meminfo`.
 ///
 /// Returns a tuple containing `RamData` and `ZramData`.
@@ -77,24 +85,24 @@ pub fn get_memory_data() -> (RamData, ZramData) {
 
     if let Ok(lines) = read_lines("/proc/meminfo") {
         for line in lines.flatten() {
-            let parts: Vec<&str> = line.split_whitespace().collect();
-            if parts.len() >= 2 {
-                let key = parts[0];
-                let val_kb: f64 = parts[1].parse().unwrap_or(0.0);
-                let val_bytes = val_kb * 1024.0;
-
-                match key {
-                    "MemTotal:" => mem_total_bytes = val_bytes,
-                    "MemAvailable:" => mem_available_bytes = val_bytes,
-                    "SwapTotal:" => swap_total_bytes = val_bytes,
-                    "SwapFree:" => swap_free_bytes = val_bytes,
-                    "Cached:" => cached_bytes = val_bytes,
-                    "Buffers:" => buffers_bytes = val_bytes,
-                    "Active:" => active_bytes = val_bytes,
-                    "Inactive:" => inactive_bytes = val_bytes,
-                    "Slab:" => slab_bytes = val_bytes,
-                    _ => {}
-                }
+            if line.starts_with("MemTotal:") {
+                mem_total_bytes = parse_kb(&line) * 1024.0;
+            } else if line.starts_with("MemAvailable:") {
+                mem_available_bytes = parse_kb(&line) * 1024.0;
+            } else if line.starts_with("SwapTotal:") {
+                swap_total_bytes = parse_kb(&line) * 1024.0;
+            } else if line.starts_with("SwapFree:") {
+                swap_free_bytes = parse_kb(&line) * 1024.0;
+            } else if line.starts_with("Cached:") {
+                cached_bytes = parse_kb(&line) * 1024.0;
+            } else if line.starts_with("Buffers:") {
+                buffers_bytes = parse_kb(&line) * 1024.0;
+            } else if line.starts_with("Active:") {
+                active_bytes = parse_kb(&line) * 1024.0;
+            } else if line.starts_with("Inactive:") {
+                inactive_bytes = parse_kb(&line) * 1024.0;
+            } else if line.starts_with("Slab:") {
+                slab_bytes = parse_kb(&line) * 1024.0;
             }
         }
     } else {

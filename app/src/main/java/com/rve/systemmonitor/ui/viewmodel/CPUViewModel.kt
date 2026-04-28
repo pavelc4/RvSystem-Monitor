@@ -14,7 +14,7 @@ class CPUViewModel @Inject constructor(systemInfoRepository: SystemInfoRepositor
     val cpuInfo = systemInfoRepository.getCpuStream()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(0),
+            started = SharingStarted.WhileSubscribed(5000),
             initialValue = CPU(),
         )
 }

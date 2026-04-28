@@ -72,7 +72,10 @@ fun CPUScreen(isActive: Boolean, viewModel: CPUViewModel = hiltViewModel()) {
             )
         }
 
-        items(cpuInfo.coreDetails) { core ->
+        items(
+            items = cpuInfo.coreDetails,
+            key = { core -> core.id }
+        ) { core ->
             CoreDetailCard(core)
         }
     }
@@ -80,7 +83,7 @@ fun CPUScreen(isActive: Boolean, viewModel: CPUViewModel = hiltViewModel()) {
 
 @Composable
 private fun CPUOverviewCard(cpu: CPU) {
-    val peakFrequency = remember(cpu.coreDetails) {
+    val peakFrequency = remember(cpu.model) {
         cpu.coreDetails.maxOfOrNull {
             it.maxFreq.substringBefore(" ").toDoubleOrNull() ?: 0.0
         } ?: 0.0
