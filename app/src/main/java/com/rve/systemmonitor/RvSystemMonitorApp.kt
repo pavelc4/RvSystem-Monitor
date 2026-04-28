@@ -30,9 +30,9 @@ import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.rve.systemmonitor.ui.components.AppBars.SimpleTopAppBar
 import com.rve.systemmonitor.ui.navigation.BottomNavBar.BottomNavigationBar
+import com.rve.systemmonitor.ui.screens.BatteryScreen
 import com.rve.systemmonitor.ui.screens.CPUScreen
 import com.rve.systemmonitor.ui.screens.HomeScreen
-import com.rve.systemmonitor.ui.screens.BatteryScreen
 import com.rve.systemmonitor.ui.screens.MemoryScreen
 import kotlinx.coroutines.launch
 
@@ -89,7 +89,6 @@ fun RvSystemMonitorApp(onNavigateToSettings: () -> Unit) {
                     2 -> "Memory"
                     3 -> "Battery"
                     else -> ""
-
                 },
                 onNavigateToSettings = onNavigateToSettings,
             )

@@ -7,8 +7,8 @@ import com.rve.systemmonitor.domain.model.Display
 import com.rve.systemmonitor.domain.model.GPU
 import com.rve.systemmonitor.domain.model.OS
 import com.rve.systemmonitor.domain.model.RAM
-import com.rve.systemmonitor.domain.model.ZRAM
 import com.rve.systemmonitor.domain.model.Storage
+import com.rve.systemmonitor.domain.model.ZRAM
 import kotlinx.coroutines.flow.Flow
 
 interface SystemInfoRepository {

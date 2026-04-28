@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rve.systemmonitor.R
 import com.rve.systemmonitor.domain.model.Battery
 import com.rve.systemmonitor.ui.viewmodel.BatteryViewModel
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel()) {
@@ -44,7 +46,7 @@ fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel
     val batteryInfo by if (isActive) {
         viewModel.batteryInfo.collectAsStateWithLifecycle()
     } else {
-        remember { kotlinx.coroutines.flow.emptyFlow<Battery>() }.collectAsStateWithLifecycle(initialBatteryInfo)
+        remember { emptyFlow<Battery>() }.collectAsStateWithLifecycle(initialBatteryInfo)
     }
 
     LazyColumn(
@@ -204,7 +206,7 @@ private fun InfoItem(label: String, value: String, modifier: Modifier = Modifier
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = androidx.compose.material3.LocalContentColor.current.copy(alpha = 0.7f),
+            color = LocalContentColor.current.copy(alpha = 0.7f),
         )
         Text(
             text = value,

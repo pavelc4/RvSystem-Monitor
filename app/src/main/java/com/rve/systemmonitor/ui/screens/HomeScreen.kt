@@ -1,16 +1,12 @@
 package com.rve.systemmonitor.ui.screens
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,12 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,10 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,7 +36,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.composables.icons.materialsymbols.rounded.R.drawable.materialsymbols_ic_mobile_3_rounded
 import com.composables.icons.materialsymbols.rounded.R.drawable.materialsymbols_ic_mobile_rounded
 import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_android_rounded_filled
-import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_memory_alt_rounded_filled
 import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_memory_rounded_filled
 import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_mobile_3_rounded_filled
 import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_mobile_rounded_filled
@@ -59,6 +47,7 @@ import com.rve.systemmonitor.domain.model.GPU
 import com.rve.systemmonitor.domain.model.OS
 import com.rve.systemmonitor.ui.viewmodel.HomeUiState
 import com.rve.systemmonitor.ui.viewmodel.HomeViewModel
+import kotlinx.coroutines.flow.emptyFlow
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -67,13 +56,13 @@ fun HomeScreen(isActive: Boolean, viewModel: HomeViewModel = hiltViewModel()) {
     val uiState by if (isActive) {
         viewModel.uiState.collectAsStateWithLifecycle()
     } else {
-        remember { kotlinx.coroutines.flow.emptyFlow<HomeUiState>() }.collectAsStateWithLifecycle(initialUiState)
+        remember { emptyFlow<HomeUiState>() }.collectAsStateWithLifecycle(initialUiState)
     }
 
     LazyColumn(
         contentPadding = PaddingValues(
             top = 16.dp,
-            bottom = 112.dp, // 96.dp + 16.dp padding
+            bottom = 112.dp,
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
@@ -583,5 +572,3 @@ private fun GPUCard(gpu: GPU) {
         }
     }
 }
-
-

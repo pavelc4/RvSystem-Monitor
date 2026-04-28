@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -51,14 +50,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_memory_alt_rounded_filled
 import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_database_rounded_filled
+import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_memory_alt_rounded_filled
 import com.rve.systemmonitor.domain.model.RAM
 import com.rve.systemmonitor.domain.model.Storage
 import com.rve.systemmonitor.domain.model.ZRAM
 import com.rve.systemmonitor.ui.viewmodel.MemoryUiState
 import com.rve.systemmonitor.ui.viewmodel.MemoryViewModel
 import java.util.Locale
+import kotlinx.coroutines.flow.emptyFlow
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -67,7 +67,7 @@ fun MemoryScreen(isActive: Boolean, viewModel: MemoryViewModel = hiltViewModel()
     val uiState by if (isActive) {
         viewModel.uiState.collectAsStateWithLifecycle()
     } else {
-        remember { kotlinx.coroutines.flow.emptyFlow<MemoryUiState>() }.collectAsStateWithLifecycle(initialUiState)
+        remember { emptyFlow<MemoryUiState>() }.collectAsStateWithLifecycle(initialUiState)
     }
 
     LaunchedEffect(isActive) {
@@ -139,7 +139,8 @@ private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) 
             MemoryDetailItem(
                 label = "Cached",
                 value = formatMemoryValue(ram.cached),
-                description = "Memory used for the file system cache to speed up file access. This memory can be reclaimed by the system if needed.",
+                description = "Memory used for the file system cache to speed up file access. " +
+                    "This memory can be reclaimed by the system if needed.",
                 onItemClick = onItemClick,
                 modifier = Modifier.weight(1f),
             )
@@ -159,14 +160,16 @@ private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) 
             MemoryDetailItem(
                 label = "Active",
                 value = formatMemoryValue(ram.active),
-                description = "Memory that is currently being used or has been used very recently. This memory is unlikely to be reclaimed soon.",
+                description = "Memory that is currently being used or has been used very recently. " +
+                    "This memory is unlikely to be reclaimed soon.",
                 onItemClick = onItemClick,
                 modifier = Modifier.weight(1f),
             )
             MemoryDetailItem(
                 label = "Inactive",
                 value = formatMemoryValue(ram.inactive),
-                description = "Memory that has not been used for a while. It is a prime candidate for being moved to Swap/ZRAM or reclaimed.",
+                description = "Memory that has not been used for a while. " +
+                    "It is a prime candidate for being moved to Swap/ZRAM or reclaimed.",
                 onItemClick = onItemClick,
                 modifier = Modifier.weight(1f),
             )

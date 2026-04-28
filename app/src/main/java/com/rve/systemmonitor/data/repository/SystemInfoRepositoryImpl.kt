@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.rve.systemmonitor.data.repository
 
 import android.app.Application
@@ -5,13 +7,14 @@ import android.util.Log
 import com.rve.systemmonitor.BuildConfig
 import com.rve.systemmonitor.domain.model.Battery
 import com.rve.systemmonitor.domain.model.CPU
+import com.rve.systemmonitor.domain.model.CoreDetail
 import com.rve.systemmonitor.domain.model.Device
 import com.rve.systemmonitor.domain.model.Display
 import com.rve.systemmonitor.domain.model.GPU
 import com.rve.systemmonitor.domain.model.OS
 import com.rve.systemmonitor.domain.model.RAM
-import com.rve.systemmonitor.domain.model.ZRAM
 import com.rve.systemmonitor.domain.model.Storage
+import com.rve.systemmonitor.domain.model.ZRAM
 import com.rve.systemmonitor.domain.repository.SettingsRepository
 import com.rve.systemmonitor.domain.repository.SystemInfoRepository
 import com.rve.systemmonitor.utils.BatteryUtils
@@ -25,6 +28,7 @@ import com.rve.systemmonitor.utils.StorageUtils
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -91,7 +95,6 @@ class SystemInfoRepositoryImpl @Inject constructor(
         )
     }
 
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getCpuStream(): Flow<CPU> = settingsRepository.cpuRefreshDelay.flatMapLatest { delayMillis ->
         flow {
             if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Started with delay: $delayMillis")
@@ -112,11 +115,11 @@ class SystemInfoRepositoryImpl @Inject constructor(
 
             while (true) {
                 if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Updated")
-                val coreDetails = mutableListOf<com.rve.systemmonitor.domain.model.CoreDetail>()
+                val coreDetails = mutableListOf<CoreDetail>()
 
                 for (i in 0 until cores) {
                     coreDetails.add(
-                        com.rve.systemmonitor.domain.model.CoreDetail(
+                        CoreDetail(
                             id = i,
                             currentFreq = CpuUtils.getCoreFrequency(i, "cur"),
                             minFreq = staticCoreInfo[i].first,
@@ -153,7 +156,6 @@ class SystemInfoRepositoryImpl @Inject constructor(
         )
     }
 
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getMemoryInfo(): Flow<Pair<RAM, ZRAM>> = settingsRepository.memoryRefreshDelay.flatMapLatest { delayMillis ->
         flow {
             if (BuildConfig.DEBUG) Log.d(TAG, "Memory Stream Started with delay: $delayMillis")

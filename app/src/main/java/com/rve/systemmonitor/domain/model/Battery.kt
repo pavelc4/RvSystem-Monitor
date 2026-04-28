@@ -7,5 +7,5 @@ data class Battery(
     val technology: String = "Unknown",
     val voltage: Int = 0,
     val temperature: Float = 0f,
-    val capacity: Double = 0.0
+    val capacity: Double = 0.0,
 )

@@ -71,12 +71,12 @@ object AppBars {
                             ) + scaleIn(
                                 animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
                             )
-                        ).togetherWith(
+                            ).togetherWith(
                             slideOutHorizontally(
                                 animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
                             ) + scaleOut(
                                 animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
-                            )
+                            ),
                         )
                     },
                     label = "SubtitleAnimation",

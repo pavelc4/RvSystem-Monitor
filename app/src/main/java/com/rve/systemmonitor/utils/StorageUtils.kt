@@ -12,11 +12,11 @@ object StorageUtils {
             val dataDir = Environment.getDataDirectory()
             val mountPath = dataDir.path
             val stat = StatFs(mountPath)
-            
+
             val totalBytes = stat.totalBytes
             val availableBytes = stat.availableBytes
             val usedBytes = totalBytes - availableBytes
-            
+
             val totalGb = totalBytes.toDouble() / (1024.0 * 1024.0 * 1024.0)
             val availableGb = availableBytes.toDouble() / (1024.0 * 1024.0 * 1024.0)
             val usedGb = usedBytes.toDouble() / (1024.0 * 1024.0 * 1024.0)
@@ -30,7 +30,7 @@ object StorageUtils {
                 used = round(usedGb * 100) / 100,
                 usedPercentage = round(usedPercentage * 100) / 100,
                 mountPath = mountPath,
-                fileSystemType = fsType
+                fileSystemType = fsType,
             )
         } catch (e: Exception) {
             Storage()

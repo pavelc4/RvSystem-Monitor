@@ -33,4 +33,3 @@ data class Storage(
     val mountPath: String = "",
     val fileSystemType: String = "",
 )
-

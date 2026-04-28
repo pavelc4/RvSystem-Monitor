@@ -19,7 +19,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,6 +38,7 @@ import com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsy
 import com.rve.systemmonitor.domain.model.CPU
 import com.rve.systemmonitor.domain.model.CoreDetail
 import com.rve.systemmonitor.ui.viewmodel.CPUViewModel
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun CPUScreen(isActive: Boolean, viewModel: CPUViewModel = hiltViewModel()) {
@@ -46,7 +46,7 @@ fun CPUScreen(isActive: Boolean, viewModel: CPUViewModel = hiltViewModel()) {
     val cpuInfo by if (isActive) {
         viewModel.cpuInfo.collectAsStateWithLifecycle()
     } else {
-        remember { kotlinx.coroutines.flow.emptyFlow<CPU>() }.collectAsStateWithLifecycle(initialCpuInfo)
+        remember { emptyFlow<CPU>() }.collectAsStateWithLifecycle(initialCpuInfo)
     }
 
     LazyColumn(
@@ -74,7 +74,7 @@ fun CPUScreen(isActive: Boolean, viewModel: CPUViewModel = hiltViewModel()) {
 
         items(
             items = cpuInfo.coreDetails,
-            key = { core -> core.id }
+            key = { core -> core.id },
         ) { core ->
             CoreDetailCard(core)
         }
