@@ -132,8 +132,13 @@ private fun BatteryOverviewCard(battery: Battery) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
+                    val healthText = if (battery.healthPercentage > 0) {
+                        "${battery.health} (${battery.healthPercentage}%)"
+                    } else {
+                        battery.health
+                    }
                     BadgeChip(
-                        text = battery.health,
+                        text = healthText,
                         containerColor = MaterialTheme.colorScheme.secondary,
                         textColor = MaterialTheme.colorScheme.onSecondary,
                     )
@@ -190,8 +195,34 @@ private fun BatteryDetailsCard(battery: Battery) {
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 InfoItem(
-                    label = "Capacity",
+                    label = "Design Capacity",
                     value = if (battery.capacity > 0) "${battery.capacity.toInt()} mAh" else "Unknown",
+                    modifier = Modifier.weight(1f),
+                )
+                InfoItem(
+                    label = "Maximum Capacity",
+                    value = if (battery.maxCapacity > 0) "${battery.maxCapacity.toInt()} mAh" else "Unknown",
+                    modifier = Modifier.weight(1f),
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                val currentMA = Math.abs(battery.current)
+                val isCharging = battery.status == "Charging"
+                val isDischarging = battery.status == "Discharging"
+                
+                val speedLabel = when {
+                    isCharging -> "Charging Speed"
+                    isDischarging -> "Discharging Speed"
+                    else -> "Current Speed"
+                }
+
+                InfoItem(
+                    label = speedLabel,
+                    value = if (battery.current != 0) "$currentMA mA" else "0 mA",
                     modifier = Modifier.weight(1f),
                 )
                 Spacer(modifier = Modifier.weight(1f))

@@ -35,6 +35,13 @@ class SettingsViewModel @Inject constructor(private val settingsRepository: Sett
             initialValue = 3000L,
         )
 
+    val batteryRefreshDelay: StateFlow<Long> = settingsRepository.batteryRefreshDelay
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 1000L,
+        )
+
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch {
             settingsRepository.setThemeMode(mode)
@@ -50,6 +57,12 @@ class SettingsViewModel @Inject constructor(private val settingsRepository: Sett
     fun setMemoryRefreshDelay(delayMillis: Long) {
         viewModelScope.launch {
             settingsRepository.setMemoryRefreshDelay(delayMillis)
+        }
+    }
+
+    fun setBatteryRefreshDelay(delayMillis: Long) {
+        viewModelScope.launch {
+            settingsRepository.setBatteryRefreshDelay(delayMillis)
         }
     }
 }

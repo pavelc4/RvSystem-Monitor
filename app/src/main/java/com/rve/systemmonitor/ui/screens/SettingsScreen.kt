@@ -61,6 +61,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     val currentTheme by viewModel.themeMode.collectAsStateWithLifecycle()
     val cpuDelayMillis by viewModel.cpuRefreshDelay.collectAsStateWithLifecycle()
     val memoryDelayMillis by viewModel.memoryRefreshDelay.collectAsStateWithLifecycle()
+    val batteryDelayMillis by viewModel.batteryRefreshDelay.collectAsStateWithLifecycle()
 
     val coroutineScope = rememberCoroutineScope()
     val snapAnimationSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
@@ -81,6 +82,14 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     var memoryCurrentValue by rememberSaveable(memoryDelayMillis) { mutableFloatStateOf((memoryDelayMillis / 1000).toFloat()) }
     var memoryAnimateJob: Job? by remember { mutableStateOf(null) }
 
+    val batterySliderState = rememberSliderState(
+        value = (batteryDelayMillis / 1000).toFloat(),
+        steps = 3,
+        valueRange = 1f..5f,
+    )
+    var batteryCurrentValue by rememberSaveable(batteryDelayMillis) { mutableFloatStateOf((batteryDelayMillis / 1000).toFloat()) }
+    var batteryAnimateJob: Job? by remember { mutableStateOf(null) }
+
     androidx.compose.runtime.LaunchedEffect(cpuDelayMillis) {
         if (!cpuSliderState.isDragging) {
             cpuSliderState.value = (cpuDelayMillis / 1000).toFloat()
@@ -92,6 +101,13 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
         if (!memorySliderState.isDragging) {
             memorySliderState.value = (memoryDelayMillis / 1000).toFloat()
             memoryCurrentValue = (memoryDelayMillis / 1000).toFloat()
+        }
+    }
+
+    androidx.compose.runtime.LaunchedEffect(batteryDelayMillis) {
+        if (!batterySliderState.isDragging) {
+            batterySliderState.value = (batteryDelayMillis / 1000).toFloat()
+            batteryCurrentValue = (batteryDelayMillis / 1000).toFloat()
         }
     }
 
@@ -136,6 +152,28 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                 memorySliderState.value = value
             }
             viewModel.setMemoryRefreshDelay(memoryCurrentValue.toLong() * 1000)
+        }
+    }
+
+    batterySliderState.shouldAutoSnap = false
+    batterySliderState.onValueChange = { newValue ->
+        batteryCurrentValue = newValue
+        if (batterySliderState.isDragging) {
+            batteryAnimateJob?.cancel()
+            batterySliderState.value = newValue
+        }
+    }
+
+    batterySliderState.onValueChangeFinished = {
+        batteryAnimateJob = coroutineScope.launch {
+            animate(
+                initialValue = batterySliderState.value,
+                targetValue = batteryCurrentValue,
+                animationSpec = snapAnimationSpec,
+            ) { value, _ ->
+                batterySliderState.value = value
+            }
+            viewModel.setBatteryRefreshDelay(batteryCurrentValue.toLong() * 1000)
         }
     }
 
@@ -416,6 +454,88 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                                     track = {
                                         SliderDefaults.Track(
                                             sliderState = memorySliderState,
+                                            modifier = Modifier.height(36.dp),
+                                            trackCornerSize = 12.dp,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.primary),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Icon(
+                                        painter = painterResource(com.rve.systemmonitor.R.drawable.battery_android_full_24px),
+                                        contentDescription = "Battery Monitoring Icon",
+                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                    )
+                                }
+
+                                Column {
+                                    Text(
+                                        text = "Battery Speed Update Interval",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        text = "Adjust how often charging/discharging speed is refreshed",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = "Refresh Rate",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        text = "${batteryCurrentValue.toInt()}s",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+
+                                Slider(
+                                    state = batterySliderState,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    track = {
+                                        SliderDefaults.Track(
+                                            sliderState = batterySliderState,
                                             modifier = Modifier.height(36.dp),
                                             trackCornerSize = 12.dp,
                                         )

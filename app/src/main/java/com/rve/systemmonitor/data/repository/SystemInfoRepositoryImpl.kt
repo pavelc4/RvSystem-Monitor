@@ -31,10 +31,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 
 @Singleton
@@ -47,15 +47,27 @@ class SystemInfoRepositoryImpl @Inject constructor(
     private val staticBatteryInfo by lazy {
         val intent = BatteryUtils.getBatteryIntent(application)
         if (intent != null) {
-            Triple(
-                BatteryUtils.getHealth(intent),
-                BatteryUtils.getTechnology(intent),
-                BatteryUtils.getCapacity(application),
+            val design = BatteryUtils.getCapacity(application)
+            val actual = BatteryUtils.getActualCapacity(application)
+            BatteryInfo(
+                health = BatteryUtils.getHealth(intent),
+                technology = BatteryUtils.getTechnology(intent),
+                designCapacity = design,
+                maxCapacity = actual,
+                healthPercentage = BatteryUtils.getHealthPercentage(actual, design)
             )
         } else {
-            Triple("Unknown", "Unknown", -1.0)
+            BatteryInfo("Unknown", "Unknown", -1.0, -1.0, -1)
         }
     }
+
+    private data class BatteryInfo(
+        val health: String,
+        val technology: String,
+        val designCapacity: Double,
+        val maxCapacity: Double,
+        val healthPercentage: Int
+    )
 
     override fun getDeviceInfo(): Device {
         return Device(
@@ -180,28 +192,46 @@ class SystemInfoRepositoryImpl @Inject constructor(
         return if (intent != null) {
             Battery(
                 level = BatteryUtils.getLevel(intent),
-                health = staticBatteryInfo.first,
+                health = staticBatteryInfo.health,
                 status = BatteryUtils.getStatus(intent),
-                technology = staticBatteryInfo.second,
+                technology = staticBatteryInfo.technology,
                 voltage = BatteryUtils.getVoltage(intent),
                 temperature = BatteryUtils.getTemperature(intent),
-                capacity = staticBatteryInfo.third,
+                capacity = staticBatteryInfo.designCapacity,
+                maxCapacity = staticBatteryInfo.maxCapacity,
+                healthPercentage = staticBatteryInfo.healthPercentage,
+                current = BatteryUtils.getCurrent(application),
             )
         } else {
             Battery()
         }
     }
 
-    override fun getBatteryStream(): Flow<Battery> = BatteryUtils.getBatteryFlow(application)
-        .map { intent ->
+    override fun getBatteryStream(): Flow<Battery> {
+        val broadcastFlow = BatteryUtils.getBatteryFlow(application)
+        
+        val pollingFlow = settingsRepository.batteryRefreshDelay.flatMapLatest { delayMillis ->
+            flow {
+                while (true) {
+                    emit(BatteryUtils.getCurrent(application))
+                    delay(delayMillis)
+                }
+            }
+        }
+
+        return combine(broadcastFlow, pollingFlow) { intent, currentNow ->
             Battery(
                 level = BatteryUtils.getLevel(intent),
-                health = staticBatteryInfo.first,
+                health = staticBatteryInfo.health,
                 status = BatteryUtils.getStatus(intent),
-                technology = staticBatteryInfo.second,
+                technology = staticBatteryInfo.technology,
                 voltage = BatteryUtils.getVoltage(intent),
                 temperature = BatteryUtils.getTemperature(intent),
-                capacity = staticBatteryInfo.third,
+                capacity = staticBatteryInfo.designCapacity,
+                maxCapacity = staticBatteryInfo.maxCapacity,
+                healthPercentage = staticBatteryInfo.healthPercentage,
+                current = currentNow,
             )
         }.flowOn(Dispatchers.IO)
+    }
 }

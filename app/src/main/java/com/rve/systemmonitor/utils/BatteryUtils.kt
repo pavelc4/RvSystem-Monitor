@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
+import android.util.Log
+import com.rve.systemmonitor.BuildConfig
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -20,7 +22,8 @@ object BatteryUtils {
                 trySend(intent)
             }
         }
-        context.registerReceiver(receiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val sticky = context.registerReceiver(receiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        if (sticky != null) trySend(sticky)
         awaitClose { context.unregisterReceiver(receiver) }
     }
 
@@ -76,5 +79,47 @@ object BatteryUtils {
         } catch (e: Exception) {
             -1.0
         }
+    }
+
+    fun getActualCapacity(context: Context): Double {
+        val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        
+        // On Android 14+ we can try to get it from BatteryManager (System API unfortunately, but let's see)
+        // For 3rd party apps, we usually use the Charge Counter / Percentage estimation
+        val chargeCounter = try {
+            batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
+        } catch (e: Exception) {
+            -1L
+        }
+        val capacityPercent = try {
+            batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        } catch (e: Exception) {
+            -1
+        }
+
+        if (chargeCounter > 0 && capacityPercent > 0) {
+            val capacity = (chargeCounter / capacityPercent.toDouble()) * 100.0 / 1000.0
+            if (BuildConfig.DEBUG) {
+                Log.d("BatteryUtils", "Maximum capacity obtained from BATTERY_PROPERTY_CHARGE_COUNTER and BATTERY_PROPERTY_CAPACITY: $capacity mAh")
+            }
+            return capacity
+        }
+
+        if (BuildConfig.DEBUG) {
+            Log.d("BatteryUtils", "Maximum capacity could not be obtained from BatteryManager properties")
+        }
+        return -1.0
+    }
+
+    fun getHealthPercentage(actualCapacity: Double, designCapacity: Double): Int {
+        if (actualCapacity <= 0 || designCapacity <= 0) return -1
+        return ((actualCapacity / designCapacity) * 100).toInt().coerceIn(0, 100)
+    }
+
+    fun getCurrent(context: Context): Int {
+        val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        // CURRENT_NOW is in microamperes
+        val currentMicroAmps = batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+        return if (currentMicroAmps != Long.MIN_VALUE) (currentMicroAmps / 1000).toInt() else 0
     }
 }
