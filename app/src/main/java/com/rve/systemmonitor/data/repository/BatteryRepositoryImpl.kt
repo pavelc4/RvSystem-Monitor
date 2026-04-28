@@ -3,6 +3,7 @@
 package com.rve.systemmonitor.data.repository
 
 import android.app.Application
+import android.os.SystemClock
 import com.rve.systemmonitor.domain.model.Battery
 import com.rve.systemmonitor.domain.repository.BatteryRepository
 import com.rve.systemmonitor.domain.repository.SettingsRepository
@@ -61,6 +62,7 @@ class BatteryRepositoryImpl @Inject constructor(private val application: Applica
                 maxCapacity = staticBatteryInfo.maxCapacity,
                 healthPercentage = staticBatteryInfo.healthPercentage,
                 cycleCount = BatteryUtils.getCycleCount(intent),
+                uptime = SystemClock.elapsedRealtime(),
                 current = BatteryUtils.getCurrent(application),
             )
         } else {
@@ -92,6 +94,7 @@ class BatteryRepositoryImpl @Inject constructor(private val application: Applica
                 maxCapacity = staticBatteryInfo.maxCapacity,
                 healthPercentage = staticBatteryInfo.healthPercentage,
                 cycleCount = BatteryUtils.getCycleCount(intent),
+                uptime = SystemClock.elapsedRealtime(),
                 current = currentNow,
             )
         }.flowOn(Dispatchers.IO)

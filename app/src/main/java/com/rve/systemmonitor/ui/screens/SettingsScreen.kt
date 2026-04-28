@@ -495,13 +495,13 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
 
                                 Column {
                                     Text(
-                                        text = "Battery Speed Update Interval",
+                                        text = "Battery Update Interval",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.SemiBold,
                                         color = MaterialTheme.colorScheme.onSurface,
                                     )
                                     Text(
-                                        text = "Adjust how often charging/discharging speed is refreshed",
+                                        text = "Adjust how often uptime and current (mA) are refreshed",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
