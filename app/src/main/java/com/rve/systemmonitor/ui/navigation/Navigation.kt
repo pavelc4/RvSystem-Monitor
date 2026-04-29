@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rve.systemmonitor.RvSystemMonitorApp
+import com.rve.systemmonitor.ui.components.ScreenWrapper
+import com.rve.systemmonitor.ui.screens.OverlaySettingsScreen
 import com.rve.systemmonitor.ui.screens.SettingsScreen
 
 @Composable
@@ -49,10 +51,12 @@ fun AppNavigation() {
                 )
             },
         ) {
-            RvSystemMonitorApp(
-                onNavigateToSettings = { navController.navigateSafely(Route.Settings) },
-                onNavigateToOverlaySettings = { navController.navigateSafely(Route.OverlaySettings) },
-            )
+            ScreenWrapper(navController = navController) {
+                RvSystemMonitorApp(
+                    onNavigateToSettings = { navController.navigateSafely(Route.Settings) },
+                    onNavigateToOverlaySettings = { navController.navigateSafely(Route.OverlaySettings) },
+                )
+            }
         }
 
         composable<Route.Settings>(
@@ -61,9 +65,11 @@ fun AppNavigation() {
             popEnterTransition = { popEnterTransition() },
             popExitTransition = { popExitTransition() },
         ) {
-            SettingsScreen(
-                onNavigateBack = { navController.popBackStack() },
-            )
+            ScreenWrapper(navController = navController) {
+                SettingsScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
         }
 
         composable<Route.OverlaySettings>(
@@ -72,9 +78,11 @@ fun AppNavigation() {
             popEnterTransition = { popEnterTransition() },
             popExitTransition = { popExitTransition() },
         ) {
-            com.rve.systemmonitor.ui.screens.OverlaySettingsScreen(
-                onNavigateBack = { navController.popBackStack() },
-            )
+            ScreenWrapper(navController = navController) {
+                OverlaySettingsScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
         }
     }
 }
