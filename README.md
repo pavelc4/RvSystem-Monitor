@@ -73,12 +73,15 @@ The project adheres to **Clean Architecture** principles, ensuring a strict sepa
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Rve27/RvSystem-Monitor/main/art/screenshot_home.png" width="30%" alt="Home Screen" />
-  <img src="https://raw.githubusercontent.com/Rve27/RvSystem-Monitor/main/art/screenshot_cpu.png" width="30%" alt="CPU Screen" />
-  <img src="https://raw.githubusercontent.com/Rve27/RvSystem-Monitor/main/art/screenshot_memory.png" width="30%" alt="Memory Screen" />
+  <img src="assets/screenshots/screenshot_1.jpg" width="32%" />
+  <img src="assets/screenshots/screenshot_2.jpg" width="32%" />
+  <img src="assets/screenshots/screenshot_3.jpg" width="32%" />
 </p>
-
-> *Note: Screenshots are representative of the Material 3 Expressive UI.*
+<p align="center">
+  <img src="assets/screenshots/screenshot_4.jpg" width="32%" />
+  <img src="assets/screenshots/screenshot_5.jpg" width="32%" />
+  <img src="assets/screenshots/screenshot_6.jpg" width="32%" />
+</p>
 
 ---
 

@@ -19,7 +19,7 @@ android {
         minSdk = 34
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.1-beta"
         ndkVersion = "30.0.14904198"
         buildToolsVersion = "37.0.0"
 
