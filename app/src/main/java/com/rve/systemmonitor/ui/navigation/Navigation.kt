@@ -19,10 +19,39 @@ fun AppNavigation() {
         startDestination = Route.Main,
         modifier = Modifier.background(MaterialTheme.colorScheme.background),
     ) {
-        composable<Route.Main> {
+        composable<Route.Main>(
+            enterTransition = {
+                mainRootEnterTransition(
+                    fromRoute = initialState.destination.route,
+                    toRoute = targetState.destination.route,
+                    fallback = enterTransition(),
+                )
+            },
+            exitTransition = {
+                mainRootExitTransition(
+                    fromRoute = initialState.destination.route,
+                    toRoute = targetState.destination.route,
+                    fallback = exitTransition(),
+                )
+            },
+            popEnterTransition = {
+                mainRootEnterTransition(
+                    fromRoute = initialState.destination.route,
+                    toRoute = targetState.destination.route,
+                    fallback = popEnterTransition(),
+                )
+            },
+            popExitTransition = {
+                mainRootExitTransition(
+                    fromRoute = initialState.destination.route,
+                    toRoute = targetState.destination.route,
+                    fallback = popExitTransition(),
+                )
+            },
+        ) {
             RvSystemMonitorApp(
-                onNavigateToSettings = { navController.navigate(Route.Settings) },
-                onNavigateToOverlaySettings = { navController.navigate(Route.OverlaySettings) },
+                onNavigateToSettings = { navController.navigateSafely(Route.Settings) },
+                onNavigateToOverlaySettings = { navController.navigateSafely(Route.OverlaySettings) },
             )
         }
 
