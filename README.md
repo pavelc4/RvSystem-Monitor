@@ -9,6 +9,11 @@ RvSystem Monitor is a powerful, high-performance Android system monitoring appli
     - **Cycle Count**: Total battery charge cycles (Native Android 14+).
     - **Uptime & Deep Sleep**: Precise system active time vs. low-power state duration.
     - **Health & Capacity**: Detailed battery health percentage, max capacity, and remaining mAh.
+- **Real-time System Overlay**: A draggable overlay that floats on top of other apps, providing:
+    - **FPS (Frames Per Second)**: Live monitor of the current frame rate.
+    - **RAM Usage**: Real-time memory consumption (Used / Total GB and Percentage).
+    - **Independent Toggles**: Choose to show FPS, RAM, or both.
+    - **Customizable Refresh Rate**: Adjust the overlay update interval from 1s to 5s.
 - **Detailed CPU Monitoring**: Real-time per-core frequencies (Current, Min, Max) and scaling governors.
 - **Memory Insights**: Live tracking of RAM and ZRAM usage with precise GB and percentage metrics.
 - **Hardware Overview**: Comprehensive information about SOC Manufacturer, Model, OS Version, and GPU (Vendor/Renderer).

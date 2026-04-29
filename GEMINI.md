@@ -19,6 +19,9 @@ The project is split into two main components:
     - **Functionality**: High-performance parsing of sysfs and procfs.
     - **Interface**: JNI functions mapped to Kotlin utility objects (`MemoryUtils`, `CpuUtils`).
 
+- **Services**:
+    - **`SystemOverlayService`**: A foreground service that manages the floating system overlay, displaying live FPS and RAM metrics. It uses `Choreographer` for FPS and `MemoryUtils` for RAM.
+
 ## Building and Running
 
 ### Prerequisites
