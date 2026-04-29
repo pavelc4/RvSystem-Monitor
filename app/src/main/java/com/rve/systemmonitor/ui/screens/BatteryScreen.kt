@@ -17,13 +17,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -41,6 +48,7 @@ import com.rve.systemmonitor.ui.viewmodel.BatteryViewModel
 import kotlin.math.abs
 import kotlinx.coroutines.flow.emptyFlow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel()) {
     val initialBatteryInfo = remember { viewModel.batteryInfo.value }
@@ -48,6 +56,19 @@ fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel
         viewModel.batteryInfo.collectAsStateWithLifecycle()
     } else {
         remember { emptyFlow<Battery>() }.collectAsStateWithLifecycle(initialBatteryInfo)
+    }
+
+    var showHelpSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+
+    if (showHelpSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showHelpSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ) {
+            BatteryHelpContent()
+        }
     }
 
     LazyColumn(
@@ -65,7 +86,10 @@ fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel
         }
 
         item {
-            BatteryDetailsCard(batteryInfo)
+            BatteryDetailsCard(
+                battery = batteryInfo,
+                onHelpClick = { showHelpSheet = true },
+            )
         }
     }
 }
@@ -155,7 +179,7 @@ private fun BatteryOverviewCard(battery: Battery) {
 }
 
 @Composable
-private fun BatteryDetailsCard(battery: Battery) {
+private fun BatteryDetailsCard(battery: Battery, onHelpClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -169,11 +193,30 @@ private fun BatteryDetailsCard(battery: Battery) {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(
-                text = "Battery Details",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = "Battery Details",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                IconButton(
+                    onClick = onHelpClick,
+                    modifier = Modifier.size(24.dp),
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            com.composables.icons.materialsymbols.roundedfilled.R.drawable.materialsymbols_ic_help_rounded_filled,
+                        ),
+                        contentDescription = "Help",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -293,6 +336,92 @@ private fun formatUptime(millis: Long): String {
         if (minutes > 0 || hours > 0 || days > 0) append("${minutes}m ")
         append("${seconds}s")
     }.trim()
+}
+
+@Composable
+private fun BatteryHelpContent() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = "Data Sources",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            item {
+                HelpItem(
+                    title = "Voltage & Temperature",
+                    description = "Sourced from real-time system broadcasts via the Android BatteryManager API.",
+                )
+            }
+            item {
+                HelpItem(
+                    title = "Power Source & Status",
+                    description = "Detected from the current charging state (AC, USB, or Wireless) via system intents.",
+                )
+            }
+            item {
+                HelpItem(
+                    title = "Wattage (Power)",
+                    description = "Calculated in real-time by multiplying Voltage (V) and Current (A).",
+                )
+            }
+            item {
+                HelpItem(
+                    title = "Current (mA)",
+                    description = "Direct hardware reading from the battery's charge counter property.",
+                )
+            }
+            item {
+                HelpItem(
+                    title = "Capacity (Design/Max/Remaining)",
+                    description = "Extracted from Android PowerProfile and battery charge counter calculations.",
+                )
+            }
+            item {
+                HelpItem(
+                    title = "Cycle Count",
+                    description = "Native Android 14+ property indicating total charge cycles completed.",
+                )
+            }
+            item {
+                HelpItem(
+                    title = "Uptime & Deep Sleep",
+                    description = "Uptime is the total time since boot. Deep Sleep is the time the CPU was in a low-power state.",
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HelpItem(title: String, description: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        HorizontalDivider(
+            modifier = Modifier.padding(top = 8.dp),
+            color = MaterialTheme.colorScheme.outlineVariant,
+        )
+    }
 }
 
 @Composable
