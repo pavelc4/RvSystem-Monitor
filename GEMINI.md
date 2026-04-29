@@ -17,7 +17,7 @@ The project is split into two main components:
     - **Framework**: Rust.
     - **Organization**: Mirrors Linux kernel structure (`kernel/` for CPU, `mm/` for Memory Management).
     - **Functionality**: High-performance parsing of sysfs and procfs.
-    - **Interface**: JNI functions mapped to Kotlin utility objects (`MemoryUtils`, `CpuUtils`).
+    - **Interface**: JNI functions mapped to Kotlin utility objects (`MemoryUtils`, `CpuUtils`). Optimized using **batch retrieval** (e.g., `getMemoryDataNative`, `getAllCoreFrequenciesNative`) to minimize context switching.
 
 - **Services**:
     - **`SystemOverlayService`**: A foreground service that manages the floating system overlay, displaying live FPS and RAM metrics. It uses `Choreographer` for FPS and `MemoryUtils` for RAM.
@@ -73,7 +73,9 @@ The project is split into two main components:
 ## Development Conventions
 
 - **Clean Architecture**: Maintain separation between data sources (Rust/JNI), domain logic (Repositories/Models), and the UI layer (ViewModels/Compose).
-- **Lifecycle Awareness**: Ensure data streams in `SystemInfoRepository` are stopped when the app is in the background.
+- **JNI Batching**: When adding new native metrics, prefer batching related data into a single JNI call (using `DoubleArray` or `jobjectArray`) to reduce overhead.
+- **Lifecycle Awareness**: Ensure data streams in `MemoryRepositoryImpl` and `CpuRepositoryImpl` are stopped when screens are inactive or the app is in the background using `WhileSubscribed`.
+- **UI Components**: Use `ScreenWrapper` for all top-level screens to ensure consistent transition effects and adaptive dimming.
 - **Styling**: Use Material 3 Expressive. Custom icons are located in `app/src/main/res/drawable/`.
-- **Debugging**: Monitor `SystemInfoRepository` logs in Logcat for data stream status.
+- **Debugging**: Monitor `MemoryRepository`, `CpuRepository`, and `BatteryUtils` logs in Logcat for data stream status.
 - **Formatting**: Run `./gradlew spotlessApply` before committing Kotlin changes. Rust code should follow standard `cargo fmt` conventions.

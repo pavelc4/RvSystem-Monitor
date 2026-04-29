@@ -1,88 +1,93 @@
-# RvSystem Monitor
+# 🚀 RvSystem Monitor
 
-RvSystem Monitor is a powerful, high-performance Android system monitoring application built with **Jetpack Compose** and a **Rust** backend. It provides real-time insights into your device's hardware, processor performance, battery health, and memory usage.
+[![Android](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
+[![Kotlin](https://img.shields.io/badge/Language-Kotlin-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Rust](https://img.shields.io/badge/Backend-Rust-000000?logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![Downloads](https://img.shields.io/github/downloads/Rve27/RvSystem-Monitor/total?logo=github&color=FF69B4)](https://github.com/Rve27/RvSystem-Monitor/releases)
+[![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE)
+[![Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=white)](https://developer.android.com/compose)
 
-## 🚀 Key Features
+**RvSystem Monitor** is a high-performance system monitoring solution for Android, merging the expressive power of **Jetpack Compose** with the raw efficiency of **Rust**. It provides low-level hardware insights while maintaining a modern, buttery-smooth user experience.
 
-- **Advanced Battery Monitoring**: Real-time tracking of:
-    - **Wattage (W)**: Live power consumption/input calculation (Voltage × Current).
-    - **Cycle Count**: Total battery charge cycles (Native Android 14+).
-    - **Uptime & Deep Sleep**: Precise system active time vs. low-power state duration.
-    - **Health & Capacity**: Detailed battery health percentage, max capacity, and remaining mAh.
-- **Real-time System Overlay**: A draggable overlay that floats on top of other apps, providing:
-    - **FPS (Frames Per Second)**: Live monitor of the current frame rate.
-    - **RAM Usage**: Real-time memory consumption (Used / Total GB and Percentage).
-    - **Independent Toggles**: Choose to show FPS, RAM, or both.
-    - **Customizable Refresh Rate**: Adjust the overlay update interval from 1s to 5s.
-- **Detailed CPU Monitoring**: Real-time per-core frequencies (Current, Min, Max) and scaling governors.
-- **Memory Insights**: Live tracking of RAM and ZRAM usage with precise GB and percentage metrics.
-- **Hardware Overview**: Comprehensive information about SOC Manufacturer, Model, OS Version, and GPU (Vendor/Renderer).
-- **Interactive Help**: Integrated **Modal Bottom Sheets** explaining data sources for technical metrics.
-- **Performance Optimized**: Native Rust backend for efficient system file parsing with minimal JVM overhead.
-- **Lifecycle Aware**: Intelligent data streaming that automatically stops when the app is in the background to save battery.
-- **Modern UI**: Clean, expressive Material 3 design with animated progress indicators and responsive layouts.
+---
 
-## 🛠️ Architecture
+## ✨ Key Features
 
-The project follows a modern, modular architecture:
+| Category | Description |
+| :--- | :--- |
+| **🔋 Battery Intelligence** | Live tracking of Wattage (W), cycle counts (Android 14+), health percentage, and precise Deep Sleep vs. Uptime metrics. |
+| **🖥️ System Overlay** | A draggable, low-overhead floating monitor for real-time FPS and RAM metrics. Fully customizable update intervals. |
+| **⚙️ CPU Dynamics** | Detailed per-core monitoring including current, minimum, and maximum frequencies and scaling governors. |
+| **🧠 Memory & ZRAM** | High-precision tracking of RAM and ZRAM usage, including cached, buffers, and kernel slab memory. |
+| **⚡ Native Performance** | Optimized Rust backend that parses kernel files (`/proc`, `/sys`) directly with efficient JNI batching. |
+| **🎨 Expressive UI** | Built with Material 3 Expressive, featuring adaptive layouts and sophisticated screen transitions. |
 
-- **Frontend (Kotlin/Compose)**:
-    - Uses **Clean Architecture** patterns with Domain, Data, and UI layers.
-    - **Dagger Hilt** for dependency injection.
-    - **StateFlow** and **Coroutines** for reactive, lifecycle-aware data handling.
-- **Backend (Rust)**:
-    - Mirroring **Linux Kernel** organization (`kernel/`, `mm/`).
-    - High-performance sysfs and procfs parsing.
-    - Interfaced via **JNI (Java Native Interface)** for maximum efficiency.
+---
 
-## 📁 Project Structure
+## 🏗️ Architecture
 
-```text
-RvSystem-Monitor/
-├── app/                  # Android application module (Kotlin/Compose)
-├── rust/                 # Native system monitoring backend (Rust)
-│   ├── src/kernel/       # Core system logic (CPU, etc.)
-│   └── src/mm/           # Memory management logic (RAM, ZRAM)
-├── build.gradle.kts      # Project-wide Gradle configuration
-├── signing.properties.example # Template for release signing configuration
-└── README.md             # This file
-```
+The project adheres to **Clean Architecture** principles, ensuring a strict separation of concerns and high maintainability.
 
-## 🛠️ Getting Started
+### The Hybrid Core
+- **Frontend (Kotlin)**: Orchestrates UI state using **Dagger Hilt** for DI and **Coroutines/StateFlow** for reactive data streams. It features a custom `ScreenWrapper` for advanced visual effects.
+- **Backend (Rust)**: Handles heavy lifting and system parsing. It mirrors the Linux kernel's structure (`kernel/` for CPU, `mm/` for Memory) to provide an idiomatic and high-performance data source.
+- **JNI Bridge**: A custom-built bridge optimized for **batch data retrieval**, minimizing the costly context switching between the JVM and Native code.
+
+---
+
+## 🛠️ Tech Stack
+
+- **UI Framework**: [Jetpack Compose](https://developer.android.com/compose) (Material 3 Expressive)
+- **Dependency Injection**: [Hilt](https://developer.android.com/training/dependency-injection/hilt-android)
+- **Native Backend**: [Rust](https://www.rust-lang.org/) via [JNI](https://github.com/jni-rs/jni-rs)
+- **Asynchronous Flow**: [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-overview.html) & [Flow](https://kotlinlang.org/docs/flow.html)
+- **Build System**: Gradle Kotlin DSL + Cargo NDK
+- **Formatting**: [Spotless](https://github.com/diffplug/spotless) (ktlint) & Cargo Fmt
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
+- **Android Studio** (Ladybug or newer)
+- **Rust Toolchain** ([rustup.rs](https://rustup.rs/))
+- **Android NDK** (Version specified in `app/build.gradle.kts`)
+- **cargo-ndk**: `cargo install cargo-ndk`
 
-1. **Android Studio** (Ladybug or newer recommended).
-2. **Rust Toolchain**: Install via [rustup.rs](https://rustup.rs/).
-3. **Android NDK**: Required for Rust compilation (NDK version defined in `app/build.gradle.kts`).
-4. **cargo-ndk**: `cargo install cargo-ndk`.
-
-### Building the Project
-
-1. **Clone the repository**:
+### Build Instructions
+1. **Clone the project**:
    ```bash
    git clone https://github.com/Rve27/RvSystem-Monitor.git
-   cd RvSystem-Monitor
    ```
-
-2. **Configure Signing (Optional for local dev)**:
-   Copy `signing.properties.example` to `signing.properties` and fill in your keystore details for release builds.
-
-3. **Build Rust Libraries**:
-   The project is configured to build Rust libraries automatically during the Gradle build process. You can also trigger it manually:
+2. **Build Native Libraries**:
    ```bash
    ./gradlew :app:buildRustLibraries
    ```
+3. **Assemble Debug APK**:
+   ```bash
+   ./gradlew assembleDebug
+   ```
 
-4. **Build and Run**:
-    - **Using Android Studio**: Open the project in Android Studio and click **Run**.
-    - **Using CLI**:
-        - **Build Debug APK**: `./gradlew assembleDebug`
-        - **Build Release APK**: `./gradlew assembleRelease`
-        - **Install and Run on Device**: `./gradlew installDebug`
+---
 
-          The APK will be located at `app/build/outputs/apk/debug/app-debug.apk`.
+## 📸 Screenshots
 
-## 📝 Debugging
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Rve27/RvSystem-Monitor/main/art/screenshot_home.png" width="30%" alt="Home Screen" />
+  <img src="https://raw.githubusercontent.com/Rve27/RvSystem-Monitor/main/art/screenshot_cpu.png" width="30%" alt="CPU Screen" />
+  <img src="https://raw.githubusercontent.com/Rve27/RvSystem-Monitor/main/art/screenshot_memory.png" width="30%" alt="Memory Screen" />
+</p>
 
-The application includes detailed lifecycle logging in `debug` variants. You can monitor the status of CPU, Memory, and Battery data streams in **Logcat** by filtering for the `SystemInfoRepository` or `BatteryUtils` tags.
+> *Note: Screenshots are representative of the Material 3 Expressive UI.*
+
+---
+
+## 📄 License
+
+This project is licensed under the **GNU General Public License v3.0**. See the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  Built with ❤️ for the Android Community.
+</p>
