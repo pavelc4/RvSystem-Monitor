@@ -70,9 +70,6 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
     val coroutineScope = rememberCoroutineScope()
     val snapAnimationSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
 
-    val fpsInteractionSource = remember { MutableInteractionSource() }
-    val ramInteractionSource = remember { MutableInteractionSource() }
-
     val isFpsEnabled by viewModel.isFpsEnabled.collectAsStateWithLifecycle()
     val isRamEnabled by viewModel.isRamEnabled.collectAsStateWithLifecycle()
     val updateIntervalMillis by viewModel.overlayUpdateInterval.collectAsStateWithLifecycle()
@@ -210,11 +207,18 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                         icon = R.drawable.sixty_fps_select_rounded,
                         isEnabled = isFpsEnabled,
                         hasPermission = hasOverlayPermission,
-                        interactionSource = fpsInteractionSource,
                         onClick = {
-                            val nextState = !isFpsEnabled
-                            viewModel.setFpsEnabled(nextState)
-                            updateService(nextState, isRamEnabled)
+                            if (!hasOverlayPermission && !isFpsEnabled) {
+                                val intent = Intent(
+                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    "package:${context.packageName}".toUri(),
+                                )
+                                context.startActivity(intent)
+                            } else {
+                                val nextState = !isFpsEnabled
+                                viewModel.setFpsEnabled(nextState)
+                                updateService(nextState, isRamEnabled)
+                            }
                         },
                     )
 
@@ -225,11 +229,18 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                         icon = R.drawable.memory_alt_filled,
                         isEnabled = isRamEnabled,
                         hasPermission = hasOverlayPermission,
-                        interactionSource = ramInteractionSource,
                         onClick = {
-                            val nextState = !isRamEnabled
-                            viewModel.setRamEnabled(nextState)
-                            updateService(isFpsEnabled, nextState)
+                            if (!hasOverlayPermission && !isRamEnabled) {
+                                val intent = Intent(
+                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    "package:${context.packageName}".toUri(),
+                                )
+                                context.startActivity(intent)
+                            } else {
+                                val nextState = !isRamEnabled
+                                viewModel.setRamEnabled(nextState)
+                                updateService(isFpsEnabled, nextState)
+                            }
                         },
                     )
                 }
@@ -342,9 +353,9 @@ private fun MetricToggleCard(
     icon: Int,
     isEnabled: Boolean,
     hasPermission: Boolean,
-    interactionSource: MutableInteractionSource,
     onClick: () -> Unit,
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -399,7 +410,8 @@ private fun MetricToggleCard(
             Switch(
                 checked = isEnabled,
                 onCheckedChange = null,
-                interactionSource = interactionSource,
+                enabled = hasPermission,
+                interactionSource = if (hasPermission) interactionSource else null,
             )
         }
     }
