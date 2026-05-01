@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,7 +43,7 @@ import com.rve.systemmonitor.domain.model.Battery
 import com.rve.systemmonitor.ui.components.chip.BadgeChip
 import com.rve.systemmonitor.ui.components.item.HelpItem
 import com.rve.systemmonitor.ui.components.item.InfoItem
-import com.rve.systemmonitor.ui.components.rememberHapticOnClick
+import com.rve.systemmonitor.ui.components.haptic.rememberHapticOnClick
 import com.rve.systemmonitor.ui.viewmodel.BatteryViewModel
 import kotlin.math.abs
 import kotlinx.coroutines.flow.emptyFlow
@@ -338,6 +339,17 @@ private fun formatUptime(millis: Long): String {
 
 @Composable
 private fun BatteryHelpContent() {
+    val helpItems = listOf(
+        "Voltage & Temperature" to "Sourced from real-time system broadcasts via the Android BatteryManager API.",
+        "Power Source & Status" to "Detected from the current charging state (AC, USB, or Wireless) via system intents.",
+        "Wattage (Power)" to "Calculated in real-time by multiplying Voltage (V) and Current (A).",
+        "Current (mA)" to "Direct hardware reading from the battery's charge counter property.",
+        "Capacity (Design/Max/Remaining)" to "Extracted from Android PowerProfile and battery charge counter calculations. " +
+            "Maximum Capacity and Health Percentage are estimates and may not be 100% accurate.",
+        "Cycle Count" to "Native Android 14+ property indicating total charge cycles completed.",
+        "Uptime & Deep Sleep" to "Uptime is the total time since boot. Deep Sleep is the time the CPU was in a low-power state.",
+    )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -355,47 +367,10 @@ private fun BatteryHelpContent() {
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            item {
+            items(helpItems) { (title, description) ->
                 HelpItem(
-                    title = "Voltage & Temperature",
-                    description = "Sourced from real-time system broadcasts via the Android BatteryManager API.",
-                )
-            }
-            item {
-                HelpItem(
-                    title = "Power Source & Status",
-                    description = "Detected from the current charging state (AC, USB, or Wireless) via system intents.",
-                )
-            }
-            item {
-                HelpItem(
-                    title = "Wattage (Power)",
-                    description = "Calculated in real-time by multiplying Voltage (V) and Current (A).",
-                )
-            }
-            item {
-                HelpItem(
-                    title = "Current (mA)",
-                    description = "Direct hardware reading from the battery's charge counter property.",
-                )
-            }
-            item {
-                HelpItem(
-                    title = "Capacity (Design/Max/Remaining)",
-                    description = "Extracted from Android PowerProfile and battery charge counter calculations. " +
-                        "Maximum Capacity and Health Percentage are estimates and may not be 100% accurate.",
-                )
-            }
-            item {
-                HelpItem(
-                    title = "Cycle Count",
-                    description = "Native Android 14+ property indicating total charge cycles completed.",
-                )
-            }
-            item {
-                HelpItem(
-                    title = "Uptime & Deep Sleep",
-                    description = "Uptime is the total time since boot. Deep Sleep is the time the CPU was in a low-power state.",
+                    title = title,
+                    description = description,
                 )
             }
         }

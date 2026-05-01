@@ -1,10 +1,9 @@
-package com.rve.systemmonitor.ui.components
+package com.rve.systemmonitor.ui.components.haptic
 
 import android.content.Context
-import android.os.Build
 import android.os.VibrationEffect
-import android.os.Vibrator
 import android.os.VibratorManager
+import androidx.compose.foundation.Indication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.ripple
@@ -20,13 +19,8 @@ import com.rve.systemmonitor.utils.VibrationIntensity
  * Performs custom haptic feedback using the system vibrator.
  */
 private fun performCustomHapticFeedback(context: Context, intensity: VibrationIntensity) {
-    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-        vibratorManager.defaultVibrator
-    } else {
-        @Suppress("DEPRECATION")
-        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-    }
+    val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+    val vibrator = vibratorManager.defaultVibrator
 
     if (!vibrator.hasVibrator()) return
 
@@ -36,12 +30,7 @@ private fun performCustomHapticFeedback(context: Context, intensity: VibrationIn
         VibrationIntensity.STRONG -> 40L to 255
     }
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        vibrator.vibrate(VibrationEffect.createOneShot(duration, amplitude))
-    } else {
-        @Suppress("DEPRECATION")
-        vibrator.vibrate(duration)
-    }
+    vibrator.vibrate(VibrationEffect.createOneShot(duration, amplitude))
 }
 
 /**
@@ -87,7 +76,7 @@ fun Modifier.hapticClickable(
     enabled: Boolean = true,
     onClickLabel: String? = null,
     role: Role? = null,
-    indication: androidx.compose.foundation.Indication? = null,
+    indication: Indication? = null,
     interactionSource: MutableInteractionSource? = null,
     onClick: () -> Unit,
 ): Modifier = composed {

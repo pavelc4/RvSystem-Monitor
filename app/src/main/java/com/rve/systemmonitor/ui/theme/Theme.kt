@@ -18,8 +18,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.rve.systemmonitor.ui.components.LocalHapticEnabled
-import com.rve.systemmonitor.ui.components.LocalVibrationIntensity
+import com.rve.systemmonitor.ui.components.haptic.LocalHapticEnabled
+import com.rve.systemmonitor.ui.components.haptic.LocalVibrationIntensity
 import com.rve.systemmonitor.utils.VibrationIntensity
 
 @Composable

@@ -38,7 +38,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rve.systemmonitor.R
-import com.rve.systemmonitor.ui.components.rememberHapticOnClick
+import com.rve.systemmonitor.ui.components.haptic.rememberHapticOnClick
 import com.rve.systemmonitor.ui.viewmodel.SetupViewModel
 
 @Composable

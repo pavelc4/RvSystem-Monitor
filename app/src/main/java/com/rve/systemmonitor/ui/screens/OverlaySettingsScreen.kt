@@ -12,7 +12,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -73,9 +72,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rve.systemmonitor.R
 import com.rve.systemmonitor.service.SystemOverlayService
 import com.rve.systemmonitor.ui.components.ExitUntilCollapsedMediumTopAppBar
-import com.rve.systemmonitor.ui.components.hapticClickable
-import com.rve.systemmonitor.ui.components.rememberHapticOnClick
-import com.rve.systemmonitor.ui.components.rememberHapticOnValueChange
+import com.rve.systemmonitor.ui.components.haptic.hapticClickable
+import com.rve.systemmonitor.ui.components.haptic.rememberHapticOnClick
+import com.rve.systemmonitor.ui.components.haptic.rememberHapticOnValueChange
 import com.rve.systemmonitor.ui.viewmodel.OverlaySettingsViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch

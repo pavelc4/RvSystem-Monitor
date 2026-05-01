@@ -36,7 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rve.systemmonitor.R
-import com.rve.systemmonitor.ui.components.rememberHapticOnClick
+import com.rve.systemmonitor.ui.components.haptic.rememberHapticOnClick
 import com.rve.systemmonitor.ui.navigation.TRANSITION_DURATION
 
 /**

@@ -1,19 +1,14 @@
 package com.rve.systemmonitor.ui.screens
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -21,12 +16,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,9 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -51,8 +41,8 @@ import com.rve.systemmonitor.R
 import com.rve.systemmonitor.domain.model.RAM
 import com.rve.systemmonitor.domain.model.Storage
 import com.rve.systemmonitor.domain.model.ZRAM
-import com.rve.systemmonitor.ui.components.chip.BadgeChip
 import com.rve.systemmonitor.ui.components.dialog.InfoDialog
+import com.rve.systemmonitor.ui.components.row.MemoryStorageProgressRow
 import com.rve.systemmonitor.ui.viewmodel.MemoryUiState
 import com.rve.systemmonitor.ui.viewmodel.MemoryViewModel
 import java.util.Locale
@@ -185,25 +175,6 @@ private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) 
 
 @Composable
 private fun StorageCard(storage: Storage) {
-    val density = LocalDensity.current
-    val customStroke = remember(density) {
-        with(density) {
-            Stroke(
-                width = 12.dp.toPx(),
-                cap = StrokeCap.Round,
-            )
-        }
-    }
-
-    val storageTargetProgress = remember(storage.usedPercentage) {
-        if (storage.usedPercentage.isNaN()) 0f else (storage.usedPercentage.toFloat() / 100f)
-    }
-    val storageAnimatedProgress by animateFloatAsState(
-        targetValue = storageTargetProgress,
-        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-        label = "Storage Progress Animation",
-    )
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -229,52 +200,13 @@ private fun StorageCard(storage: Storage) {
                 modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Row(
-                    modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    CircularWavyProgressIndicator(
-                        progress = { storageAnimatedProgress },
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f),
-                        stroke = customStroke,
-                        trackStroke = customStroke,
-                        wavelength = 25.dp,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .aspectRatio(1f),
-                    )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Column {
-                            Text(
-                                text = "Internal Storage",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            )
-                            Text(
-                                text = "${storage.used} / ${storage.total} GB",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            BadgeChip(
-                                text = "${storage.usedPercentage}%",
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                textColor = MaterialTheme.colorScheme.onPrimary,
-                            )
-                            BadgeChip(
-                                text = "${storage.available} GB Free",
-                                containerColor = MaterialTheme.colorScheme.tertiary,
-                                textColor = MaterialTheme.colorScheme.onTertiary,
-                            )
-                        }
-                    }
-                }
+                MemoryStorageProgressRow(
+                    label = "Internal Storage",
+                    usedValue = storage.used.toString(),
+                    totalValue = storage.total.toString(),
+                    usedPercentage = if (storage.usedPercentage.isNaN()) 0f else storage.usedPercentage.toFloat(),
+                    freeValue = storage.available.toString(),
+                )
 
                 HorizontalDivider(
                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f),
@@ -365,34 +297,6 @@ private fun MemoryDetailItem(
 
 @Composable
 private fun MemoryCard(ram: RAM, zram: ZRAM) {
-    val density = LocalDensity.current
-    val customStroke = remember(density) {
-        with(density) {
-            Stroke(
-                width = 12.dp.toPx(),
-                cap = StrokeCap.Round,
-            )
-        }
-    }
-
-    val ramTargetProgress = remember(ram.usedPercentage) {
-        if (ram.usedPercentage.isNaN()) 0f else (ram.usedPercentage.toFloat() / 100f)
-    }
-    val ramAnimatedProgress by animateFloatAsState(
-        targetValue = ramTargetProgress,
-        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-        label = "RAM Progress Animation",
-    )
-
-    val zramTargetProgress = remember(zram.usedPercentage) {
-        if (zram.usedPercentage.isNaN()) 0f else (zram.usedPercentage.toFloat() / 100f)
-    }
-    val zramAnimatedProgress by animateFloatAsState(
-        targetValue = zramTargetProgress,
-        animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
-        label = "ZRAM Progress Animation",
-    )
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -418,100 +322,23 @@ private fun MemoryCard(ram: RAM, zram: ZRAM) {
                 modifier = Modifier.padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
-                Row(
-                    modifier = Modifier.height(IntrinsicSize.Min),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    CircularWavyProgressIndicator(
-                        progress = { ramAnimatedProgress },
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f),
-                        stroke = customStroke,
-                        trackStroke = customStroke,
-                        wavelength = 25.dp,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .aspectRatio(1f),
-                    )
-
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Column {
-                            Text(
-                                text = "RAM",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                            )
-                            Text(
-                                text = "${ram.used} / ${ram.total} GB",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            BadgeChip(
-                                text = "${ram.usedPercentage}%",
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                textColor = MaterialTheme.colorScheme.onPrimary,
-                            )
-                            BadgeChip(
-                                text = "${ram.available} GB Free",
-                                containerColor = MaterialTheme.colorScheme.tertiary,
-                                textColor = MaterialTheme.colorScheme.onTertiary,
-                            )
-                        }
-                    }
-                }
+                MemoryStorageProgressRow(
+                    label = "RAM",
+                    usedValue = ram.used.toString(),
+                    totalValue = ram.total.toString(),
+                    usedPercentage = if (ram.usedPercentage.isNaN()) 0f else ram.usedPercentage.toFloat(),
+                    freeValue = ram.available.toString(),
+                )
 
                 if (zram.isActive) {
-                    Row(
-                        modifier = Modifier.height(IntrinsicSize.Min),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    ) {
-                        CircularWavyProgressIndicator(
-                            progress = { zramAnimatedProgress },
-                            color = MaterialTheme.colorScheme.tertiary,
-                            trackColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f),
-                            stroke = customStroke,
-                            trackStroke = customStroke,
-                            wavelength = 25.dp,
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .aspectRatio(1f),
-                        )
-
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Column {
-                                Text(
-                                    text = "ZRAM",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                )
-                                Text(
-                                    text = "${zram.used} / ${zram.total} GB",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                            }
-
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                BadgeChip(
-                                    text = "${zram.usedPercentage}%",
-                                    containerColor = MaterialTheme.colorScheme.primary,
-                                    textColor = MaterialTheme.colorScheme.onPrimary,
-                                )
-                                BadgeChip(
-                                    text = "${zram.available} GB Free",
-                                    containerColor = MaterialTheme.colorScheme.tertiary,
-                                    textColor = MaterialTheme.colorScheme.onTertiary,
-                                )
-                            }
-                        }
-                    }
+                    MemoryStorageProgressRow(
+                        label = "ZRAM",
+                        usedValue = zram.used.toString(),
+                        totalValue = zram.total.toString(),
+                        usedPercentage = if (zram.usedPercentage.isNaN()) 0f else zram.usedPercentage.toFloat(),
+                        freeValue = zram.available.toString(),
+                        progressColor = MaterialTheme.colorScheme.tertiary,
+                    )
                 }
             }
         }

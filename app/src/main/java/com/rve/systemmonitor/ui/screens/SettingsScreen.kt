@@ -57,9 +57,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rve.systemmonitor.R
 import com.rve.systemmonitor.ui.components.ExitUntilCollapsedMediumTopAppBar
-import com.rve.systemmonitor.ui.components.hapticClickable
-import com.rve.systemmonitor.ui.components.rememberHapticOnClick
-import com.rve.systemmonitor.ui.components.rememberHapticOnValueChange
+import com.rve.systemmonitor.ui.components.haptic.hapticClickable
+import com.rve.systemmonitor.ui.components.haptic.rememberHapticOnClick
+import com.rve.systemmonitor.ui.components.haptic.rememberHapticOnValueChange
 import com.rve.systemmonitor.ui.viewmodel.SettingsViewModel
 import com.rve.systemmonitor.utils.ThemeMode
 import com.rve.systemmonitor.utils.VibrationIntensity
@@ -316,7 +316,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                 modifier = Modifier
+                                    modifier = Modifier
                                         .weight(1f)
                                         .padding(vertical = 8.dp),
                                 ) {

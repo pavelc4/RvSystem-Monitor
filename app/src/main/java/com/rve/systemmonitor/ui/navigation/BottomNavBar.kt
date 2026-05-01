@@ -9,7 +9,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -43,7 +42,7 @@ import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
 import com.rve.systemmonitor.R
-import com.rve.systemmonitor.ui.components.hapticClickable
+import com.rve.systemmonitor.ui.components.haptic.hapticClickable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
