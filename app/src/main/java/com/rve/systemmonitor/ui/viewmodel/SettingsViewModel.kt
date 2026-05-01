@@ -21,6 +21,13 @@ class SettingsViewModel @Inject constructor(private val settingsRepository: Sett
             initialValue = ThemeMode.SYSTEM,
         )
 
+    val hapticFeedbackEnabled: StateFlow<Boolean> = settingsRepository.hapticFeedbackEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = true,
+        )
+
     val cpuRefreshDelay: StateFlow<Long> = settingsRepository.cpuRefreshDelay
         .stateIn(
             scope = viewModelScope,
@@ -45,6 +52,12 @@ class SettingsViewModel @Inject constructor(private val settingsRepository: Sett
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch {
             settingsRepository.setThemeMode(mode)
+        }
+    }
+
+    fun setHapticFeedbackEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setHapticFeedbackEnabled(enabled)
         }
     }
 

@@ -12,14 +12,16 @@ import androidx.compose.material3.MotionScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.rve.systemmonitor.ui.components.LocalHapticEnabled
 
 @Composable
-fun RvSystemMonitorTheme(darkTheme: Boolean, content: @Composable () -> Unit) {
+fun RvSystemMonitorTheme(darkTheme: Boolean, hapticEnabled: Boolean = true, content: @Composable () -> Unit) {
     val context = LocalContext.current
     val targetColorScheme = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     val colorScheme = animateColorScheme(targetColorScheme)
@@ -34,7 +36,11 @@ fun RvSystemMonitorTheme(darkTheme: Boolean, content: @Composable () -> Unit) {
         colorScheme = colorScheme,
         motionScheme = MotionScheme.expressive(),
         typography = appTypography,
-        content = content,
+        content = {
+            CompositionLocalProvider(LocalHapticEnabled provides hapticEnabled) {
+                content()
+            }
+        },
     )
 }
 

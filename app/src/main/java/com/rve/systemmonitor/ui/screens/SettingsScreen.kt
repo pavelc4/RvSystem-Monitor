@@ -1,5 +1,6 @@
 package com.rve.systemmonitor.ui.screens
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +27,8 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSliderState
@@ -47,6 +51,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rve.systemmonitor.R
 import com.rve.systemmonitor.ui.components.ExitUntilCollapsedMediumTopAppBar
+import com.rve.systemmonitor.ui.components.hapticClickable
+import com.rve.systemmonitor.ui.components.rememberHapticOnClick
+import com.rve.systemmonitor.ui.components.rememberHapticOnValueChange
 import com.rve.systemmonitor.ui.viewmodel.SettingsViewModel
 import com.rve.systemmonitor.utils.ThemeMode
 import kotlinx.coroutines.Job
@@ -57,6 +64,7 @@ import kotlinx.coroutines.launch
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBack: () -> Unit) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val currentTheme by viewModel.themeMode.collectAsStateWithLifecycle()
+    val hapticEnabled by viewModel.hapticFeedbackEnabled.collectAsStateWithLifecycle()
     val cpuDelayMillis by viewModel.cpuRefreshDelay.collectAsStateWithLifecycle()
     val memoryDelayMillis by viewModel.memoryRefreshDelay.collectAsStateWithLifecycle()
     val batteryDelayMillis by viewModel.batteryRefreshDelay.collectAsStateWithLifecycle()
@@ -110,7 +118,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     }
 
     cpuSliderState.shouldAutoSnap = false
-    cpuSliderState.onValueChange = { newValue ->
+    cpuSliderState.onValueChange = rememberHapticOnValueChange { newValue ->
         cpuCurrentValue = newValue
         if (cpuSliderState.isDragging) {
             cpuAnimateJob?.cancel()
@@ -132,7 +140,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     }
 
     memorySliderState.shouldAutoSnap = false
-    memorySliderState.onValueChange = { newValue ->
+    memorySliderState.onValueChange = rememberHapticOnValueChange { newValue ->
         memoryCurrentValue = newValue
         if (memorySliderState.isDragging) {
             memoryAnimateJob?.cancel()
@@ -154,7 +162,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     }
 
     batterySliderState.shouldAutoSnap = false
-    batterySliderState.onValueChange = { newValue ->
+    batterySliderState.onValueChange = rememberHapticOnValueChange { newValue ->
         batteryCurrentValue = newValue
         if (batterySliderState.isDragging) {
             batteryAnimateJob?.cancel()
@@ -268,7 +276,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                                             index = index,
                                             count = themeOptions.size,
                                         ),
-                                        onClick = { viewModel.setThemeMode(mode) },
+                                        onClick = rememberHapticOnClick { viewModel.setThemeMode(mode) },
                                         selected = currentTheme == mode,
                                     ) {
                                         Text(
@@ -278,6 +286,69 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                                         )
                                     }
                                 }
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .hapticClickable { viewModel.setHapticFeedbackEnabled(!hapticEnabled) },
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    modifier = Modifier.weight(1f),
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(MaterialTheme.colorScheme.primary),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(R.drawable.mobile_vibrate_filled),
+                                            contentDescription = "Haptic Icon",
+                                            tint = MaterialTheme.colorScheme.onSecondary,
+                                        )
+                                    }
+
+                                    Column {
+                                        Text(
+                                            text = "Haptic Feedback",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                        )
+                                        Text(
+                                            text = "Subtle vibrations on interaction",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        )
+                                    }
+                                }
+
+                                Switch(
+                                    checked = hapticEnabled,
+                                    onCheckedChange = { viewModel.setHapticFeedbackEnabled(it) },
+                                    thumbContent = {
+                                        Crossfade(
+                                            targetState = hapticEnabled,
+                                            label = "Haptic Switch Icon",
+                                        ) { enabled ->
+                                            Icon(
+                                                painter = painterResource(
+                                                    if (enabled) R.drawable.check_rounded else R.drawable.close_rounded,
+                                                ),
+                                                contentDescription = null,
+                                                modifier = Modifier.size(SwitchDefaults.IconSize),
+                                            )
+                                        }
+                                    },
+                                )
                             }
                         }
                     }

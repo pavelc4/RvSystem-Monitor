@@ -16,8 +16,9 @@ class MainViewModel @Inject constructor(settingsRepository: SettingsRepository) 
     val uiState: StateFlow<MainUiState> = combine(
         settingsRepository.themeMode,
         settingsRepository.isSetupCompleted,
-    ) { theme, setupCompleted ->
-        MainUiState.Success(theme, setupCompleted)
+        settingsRepository.hapticFeedbackEnabled,
+    ) { theme, setupCompleted, hapticEnabled ->
+        MainUiState.Success(theme, setupCompleted, hapticEnabled)
     }.stateIn(
         scope = viewModelScope,
         initialValue = MainUiState.Loading,
@@ -27,5 +28,5 @@ class MainViewModel @Inject constructor(settingsRepository: SettingsRepository) 
 
 sealed interface MainUiState {
     data object Loading : MainUiState
-    data class Success(val themeMode: ThemeMode, val isSetupCompleted: Boolean) : MainUiState
+    data class Success(val themeMode: ThemeMode, val isSetupCompleted: Boolean, val hapticFeedbackEnabled: Boolean) : MainUiState
 }

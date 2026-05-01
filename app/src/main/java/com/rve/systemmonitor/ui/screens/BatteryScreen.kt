@@ -42,6 +42,7 @@ import com.rve.systemmonitor.domain.model.Battery
 import com.rve.systemmonitor.ui.components.chip.BadgeChip
 import com.rve.systemmonitor.ui.components.item.HelpItem
 import com.rve.systemmonitor.ui.components.item.InfoItem
+import com.rve.systemmonitor.ui.components.rememberHapticOnClick
 import com.rve.systemmonitor.ui.viewmodel.BatteryViewModel
 import kotlin.math.abs
 import kotlinx.coroutines.flow.emptyFlow
@@ -203,7 +204,7 @@ private fun BatteryDetailsCard(battery: Battery, onHelpClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                 )
                 IconButton(
-                    onClick = onHelpClick,
+                    onClick = rememberHapticOnClick(onHelpClick),
                     modifier = Modifier.size(24.dp),
                 ) {
                     Icon(

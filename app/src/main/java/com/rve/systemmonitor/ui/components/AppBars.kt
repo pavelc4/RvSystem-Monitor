@@ -36,6 +36,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.rve.systemmonitor.R
+import com.rve.systemmonitor.ui.components.rememberHapticOnClick
 import com.rve.systemmonitor.ui.navigation.TRANSITION_DURATION
 
 /**
@@ -100,7 +101,7 @@ object AppBars {
                     state = rememberTooltipState(),
                 ) {
                     IconButton(
-                        onClick = onNavigateToOverlaySettings,
+                        onClick = rememberHapticOnClick(onNavigateToOverlaySettings),
                     ) {
                         Icon(
                             painterResource(R.drawable.layers_filled),
@@ -121,7 +122,7 @@ object AppBars {
                     state = rememberTooltipState(),
                 ) {
                     IconButton(
-                        onClick = onNavigateToSettings,
+                        onClick = rememberHapticOnClick(onNavigateToSettings),
                     ) {
                         Icon(
                             painterResource(R.drawable.settings_filled),
@@ -178,7 +179,7 @@ fun ExitUntilCollapsedMediumTopAppBar(title: String, onNavigateBack: () -> Unit,
                 ) { scrolled ->
                     if (scrolled) {
                         FilledIconButton(
-                            onClick = onNavigateBack,
+                            onClick = rememberHapticOnClick(onNavigateBack),
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.arrow_back_ios_new),
@@ -187,7 +188,7 @@ fun ExitUntilCollapsedMediumTopAppBar(title: String, onNavigateBack: () -> Unit,
                         }
                     } else {
                         FilledTonalIconButton(
-                            onClick = onNavigateBack,
+                            onClick = rememberHapticOnClick(onNavigateBack),
                         ) {
                             Icon(
                                 painter = painterResource(R.drawable.arrow_back_ios_new),

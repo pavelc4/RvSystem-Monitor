@@ -73,6 +73,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rve.systemmonitor.R
 import com.rve.systemmonitor.service.SystemOverlayService
 import com.rve.systemmonitor.ui.components.ExitUntilCollapsedMediumTopAppBar
+import com.rve.systemmonitor.ui.components.hapticClickable
+import com.rve.systemmonitor.ui.components.rememberHapticOnClick
+import com.rve.systemmonitor.ui.components.rememberHapticOnValueChange
 import com.rve.systemmonitor.ui.viewmodel.OverlaySettingsViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -168,7 +171,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
     }
 
     delaySliderState.shouldAutoSnap = false
-    delaySliderState.onValueChange = { newValue ->
+    delaySliderState.onValueChange = rememberHapticOnValueChange { newValue ->
         overlayCurrentValue = newValue
         if (delaySliderState.isDragging) {
             delayAnimateJob?.cancel()
@@ -252,7 +255,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                         icon = R.drawable.sixty_fps_select_rounded,
                         isEnabled = isFpsEnabled,
                         hasPermission = hasOverlayPermission,
-                        onClick = {
+                        onClick = rememberHapticOnClick {
                             if (!hasOverlayPermission && !isFpsEnabled) {
                                 val intent = Intent(
                                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -273,7 +276,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                         icon = R.drawable.memory_alt_filled,
                         isEnabled = isRamEnabled,
                         hasPermission = hasOverlayPermission,
-                        onClick = {
+                        onClick = rememberHapticOnClick {
                             if (!hasOverlayPermission && !isRamEnabled) {
                                 val intent = Intent(
                                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -496,7 +499,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
                                         androidx.compose.material3.IconButton(
-                                            onClick = {
+                                            onClick = rememberHapticOnClick {
                                                 viewModel.setOverlayUpdateInterval(1000L)
                                                 if (isServiceRunning) updateService(interval = 1000L)
                                             },
@@ -590,7 +593,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                                                 color = MaterialTheme.colorScheme.primary,
                                                 shape = CircleShape,
                                             )
-                                            .clickable(enabled = isAnyMetricEnabled) {
+                                            .hapticClickable(enabled = isAnyMetricEnabled) {
                                                 viewModel.setOverlayTextColor(color.toArgb())
                                                 if (isServiceRunning) updateService(color = color.toArgb())
                                             },
@@ -716,7 +719,7 @@ private fun AppearanceSlider(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 androidx.compose.material3.IconButton(
-                    onClick = onReset,
+                    onClick = rememberHapticOnClick(onReset),
                     enabled = enabled,
                     modifier = Modifier.size(24.dp),
                 ) {

@@ -46,6 +46,7 @@ import com.rve.systemmonitor.domain.model.Display
 import com.rve.systemmonitor.domain.model.GPU
 import com.rve.systemmonitor.domain.model.OS
 import com.rve.systemmonitor.ui.components.item.HelpItem
+import com.rve.systemmonitor.ui.components.rememberHapticOnClick
 import com.rve.systemmonitor.ui.viewmodel.HomeUiState
 import com.rve.systemmonitor.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.flow.emptyFlow
@@ -163,7 +164,7 @@ private fun DeviceCard(device: Device, onHelpClick: () -> Unit) {
                     }
 
                     IconButton(
-                        onClick = onHelpClick,
+                        onClick = rememberHapticOnClick(onHelpClick),
                         modifier = Modifier.size(24.dp),
                     ) {
                         Icon(

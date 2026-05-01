@@ -20,12 +20,18 @@ class SettingsPreferences(private val context: Context) {
         val CPU_REFRESH_DELAY_KEY = longPreferencesKey("cpu_refresh_delay")
         val MEMORY_REFRESH_DELAY_KEY = longPreferencesKey("memory_refresh_delay")
         val BATTERY_REFRESH_DELAY_KEY = longPreferencesKey("battery_refresh_delay")
+        val HAPTIC_FEEDBACK_ENABLED_KEY = booleanPreferencesKey("haptic_feedback_enabled")
     }
 
     val themeModeFlow: Flow<ThemeMode> = context.dataStore.data
         .map { preferences ->
             val mode = preferences[THEME_MODE_KEY] ?: ThemeMode.SYSTEM.name
             ThemeMode.valueOf(mode)
+        }
+
+    val hapticFeedbackEnabledFlow: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[HAPTIC_FEEDBACK_ENABLED_KEY] ?: true
         }
 
     val isSetupCompletedFlow: Flow<Boolean> = context.dataStore.data
@@ -75,6 +81,12 @@ class SettingsPreferences(private val context: Context) {
     suspend fun saveBatteryRefreshDelay(delayMillis: Long) {
         context.dataStore.edit { preferences ->
             preferences[BATTERY_REFRESH_DELAY_KEY] = delayMillis
+        }
+    }
+
+    suspend fun saveHapticFeedbackEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[HAPTIC_FEEDBACK_ENABLED_KEY] = enabled
         }
     }
 }

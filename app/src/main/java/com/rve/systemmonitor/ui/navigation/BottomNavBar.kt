@@ -43,6 +43,7 @@ import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
 import com.rve.systemmonitor.R
+import com.rve.systemmonitor.ui.components.hapticClickable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -144,7 +145,7 @@ object BottomNavBar {
                     scaleY = scale
                 }
                 .clip(CircleShape)
-                .clickable(onClick = onClick)
+                .hapticClickable(onClick = onClick)
                 .pointerInput(isSelected) {
                     val animationSpec = spring(
                         dampingRatio = 0.5f,

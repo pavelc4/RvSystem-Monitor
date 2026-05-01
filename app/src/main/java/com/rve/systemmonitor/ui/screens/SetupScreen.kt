@@ -38,6 +38,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.rve.systemmonitor.R
+import com.rve.systemmonitor.ui.components.rememberHapticOnClick
 import com.rve.systemmonitor.ui.viewmodel.SetupViewModel
 
 @Composable
@@ -122,7 +123,7 @@ fun SetupScreen(viewModel: SetupViewModel = hiltViewModel(), onPermissionGranted
             Spacer(modifier = Modifier.height(48.dp))
 
             Button(
-                onClick = {
+                onClick = rememberHapticOnClick {
                     val intent = Intent(
                         Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                         "package:${context.packageName}".toUri(),
@@ -148,7 +149,7 @@ fun SetupScreen(viewModel: SetupViewModel = hiltViewModel(), onPermissionGranted
             Spacer(modifier = Modifier.height(12.dp))
 
             TextButton(
-                onClick = {
+                onClick = rememberHapticOnClick {
                     viewModel.completeSetup()
                     onSkip()
                 },

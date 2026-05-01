@@ -15,6 +15,8 @@ class SettingsRepositoryImpl @Inject constructor(application: Application) : Set
 
     override val themeMode: Flow<ThemeMode> = settingsPreferences.themeModeFlow
 
+    override val hapticFeedbackEnabled: Flow<Boolean> = settingsPreferences.hapticFeedbackEnabledFlow
+
     override val isSetupCompleted: Flow<Boolean> = settingsPreferences.isSetupCompletedFlow
 
     override val cpuRefreshDelay: Flow<Long> = settingsPreferences.cpuRefreshDelayFlow
@@ -25,6 +27,10 @@ class SettingsRepositoryImpl @Inject constructor(application: Application) : Set
 
     override suspend fun setThemeMode(mode: ThemeMode) {
         settingsPreferences.saveThemeMode(mode)
+    }
+
+    override suspend fun setHapticFeedbackEnabled(enabled: Boolean) {
+        settingsPreferences.saveHapticFeedbackEnabled(enabled)
     }
 
     override suspend fun setSetupCompleted(completed: Boolean) {

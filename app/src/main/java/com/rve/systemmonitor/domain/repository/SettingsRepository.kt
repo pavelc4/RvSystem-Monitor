@@ -5,11 +5,13 @@ import kotlinx.coroutines.flow.Flow
 
 interface SettingsRepository {
     val themeMode: Flow<ThemeMode>
+    val hapticFeedbackEnabled: Flow<Boolean>
     val isSetupCompleted: Flow<Boolean>
     val cpuRefreshDelay: Flow<Long>
     val memoryRefreshDelay: Flow<Long>
     val batteryRefreshDelay: Flow<Long>
     suspend fun setThemeMode(mode: ThemeMode)
+    suspend fun setHapticFeedbackEnabled(enabled: Boolean)
     suspend fun setSetupCompleted(completed: Boolean)
     suspend fun setCpuRefreshDelay(delayMillis: Long)
     suspend fun setMemoryRefreshDelay(delayMillis: Long)

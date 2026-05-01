@@ -40,15 +40,17 @@ class MainActivity : ComponentActivity() {
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
             if (uiState is MainUiState.Success) {
-                val themeMode = (uiState as MainUiState.Success).themeMode
-                val isSetupCompleted = (uiState as MainUiState.Success).isSetupCompleted
+                val successState = uiState as MainUiState.Success
+                val themeMode = successState.themeMode
+                val isSetupCompleted = successState.isSetupCompleted
+                val hapticEnabled = successState.hapticFeedbackEnabled
                 val darkTheme = when (themeMode) {
                     ThemeMode.LIGHT -> false
                     ThemeMode.DARK -> true
                     ThemeMode.SYSTEM -> isSystemInDarkTheme()
                 }
 
-                RvSystemMonitorTheme(darkTheme) {
+                RvSystemMonitorTheme(darkTheme, hapticEnabled) {
                     AppNavigation(isSetupCompleted)
                 }
             }
