@@ -17,13 +17,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,11 +45,12 @@ import com.rve.systemmonitor.domain.model.Device
 import com.rve.systemmonitor.domain.model.Display
 import com.rve.systemmonitor.domain.model.GPU
 import com.rve.systemmonitor.domain.model.OS
+import com.rve.systemmonitor.ui.components.item.HelpItem
 import com.rve.systemmonitor.ui.viewmodel.HomeUiState
 import com.rve.systemmonitor.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.flow.emptyFlow
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(isActive: Boolean, viewModel: HomeViewModel = hiltViewModel()) {
     val initialUiState = remember { viewModel.uiState.value }
@@ -51,6 +58,19 @@ fun HomeScreen(isActive: Boolean, viewModel: HomeViewModel = hiltViewModel()) {
         viewModel.uiState.collectAsStateWithLifecycle()
     } else {
         remember { emptyFlow<HomeUiState>() }.collectAsStateWithLifecycle(initialUiState)
+    }
+
+    var showHelpSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+
+    if (showHelpSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showHelpSheet = false },
+            sheetState = sheetState,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        ) {
+            HomeHelpContent()
+        }
     }
 
     LazyColumn(
@@ -64,7 +84,10 @@ fun HomeScreen(isActive: Boolean, viewModel: HomeViewModel = hiltViewModel()) {
             .padding(horizontal = 16.dp),
     ) {
         item {
-            DeviceCard(uiState.device)
+            DeviceCard(
+                device = uiState.device,
+                onHelpClick = { showHelpSheet = true },
+            )
         }
         item {
             OSCard(uiState.os)
@@ -82,7 +105,7 @@ fun HomeScreen(isActive: Boolean, viewModel: HomeViewModel = hiltViewModel()) {
 }
 
 @Composable
-private fun DeviceCard(device: Device) {
+private fun DeviceCard(device: Device, onHelpClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
@@ -109,29 +132,47 @@ private fun DeviceCard(device: Device) {
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.primary)
-                            .padding(8.dp),
-                        contentAlignment = Alignment.Center,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Icon(
-                            painter = painterResource(R.drawable.mobile_filled),
-                            contentDescription = "Device Icon",
-                            tint = MaterialTheme.colorScheme.onPrimary,
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.primary)
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.mobile_filled),
+                                contentDescription = "Device Icon",
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                            )
+                        }
+
+                        Text(
+                            text = "Device",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold,
                         )
                     }
 
-                    Text(
-                        text = "Device",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                    IconButton(
+                        onClick = onHelpClick,
+                        modifier = Modifier.size(24.dp),
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.help_filled),
+                            contentDescription = "Help",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
                 }
 
                 Column {
@@ -562,6 +603,57 @@ private fun GPUCard(gpu: GPU) {
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeHelpContent() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .padding(bottom = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = "Data Sources",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+        )
+
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            item {
+                HelpItem(
+                    title = "Device & Operating System",
+                    description = "Information such as model, manufacturer, and Android version is extracted from " +
+                        "the system's Build properties and secure patch levels.",
+                )
+            }
+            item {
+                HelpItem(
+                    title = "Display",
+                    description = "Screen resolution, refresh rate, and density metrics are obtained via the " +
+                        "Android WindowManager and Display APIs.",
+                )
+            }
+            item {
+                HelpItem(
+                    title = "Processor (CPU)",
+                    description = "Detailed hardware info, including core count and architecture, is parsed from " +
+                        "Linux kernel files (/proc/cpuinfo) using the high-performance Rust backend.",
+                )
+            }
+            item {
+                HelpItem(
+                    title = "Graphics (GPU)",
+                    description = "The graphics renderer, vendor, and OpenGL ES version are retrieved directly " +
+                        "from the device's GPU through the EGL context.",
+                )
             }
         }
     }
