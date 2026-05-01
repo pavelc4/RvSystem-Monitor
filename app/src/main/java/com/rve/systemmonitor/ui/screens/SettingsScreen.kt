@@ -1,7 +1,12 @@
 package com.rve.systemmonitor.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animate
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSliderState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +62,7 @@ import com.rve.systemmonitor.ui.components.rememberHapticOnClick
 import com.rve.systemmonitor.ui.components.rememberHapticOnValueChange
 import com.rve.systemmonitor.ui.viewmodel.SettingsViewModel
 import com.rve.systemmonitor.utils.ThemeMode
+import com.rve.systemmonitor.utils.VibrationIntensity
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -65,6 +72,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val currentTheme by viewModel.themeMode.collectAsStateWithLifecycle()
     val hapticEnabled by viewModel.hapticFeedbackEnabled.collectAsStateWithLifecycle()
+    val vibrationIntensity by viewModel.vibrationIntensity.collectAsStateWithLifecycle()
     val cpuDelayMillis by viewModel.cpuRefreshDelay.collectAsStateWithLifecycle()
     val memoryDelayMillis by viewModel.memoryRefreshDelay.collectAsStateWithLifecycle()
     val batteryDelayMillis by viewModel.batteryRefreshDelay.collectAsStateWithLifecycle()
@@ -96,21 +104,21 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     var batteryCurrentValue by rememberSaveable(batteryDelayMillis) { mutableFloatStateOf((batteryDelayMillis / 1000).toFloat()) }
     var batteryAnimateJob: Job? by remember { mutableStateOf(null) }
 
-    androidx.compose.runtime.LaunchedEffect(cpuDelayMillis) {
+    LaunchedEffect(cpuDelayMillis) {
         if (!cpuSliderState.isDragging) {
             cpuSliderState.value = (cpuDelayMillis / 1000).toFloat()
             cpuCurrentValue = (cpuDelayMillis / 1000).toFloat()
         }
     }
 
-    androidx.compose.runtime.LaunchedEffect(memoryDelayMillis) {
+    LaunchedEffect(memoryDelayMillis) {
         if (!memorySliderState.isDragging) {
             memorySliderState.value = (memoryDelayMillis / 1000).toFloat()
             memoryCurrentValue = (memoryDelayMillis / 1000).toFloat()
         }
     }
 
-    androidx.compose.runtime.LaunchedEffect(batteryDelayMillis) {
+    LaunchedEffect(batteryDelayMillis) {
         if (!batterySliderState.isDragging) {
             batterySliderState.value = (batteryDelayMillis / 1000).toFloat()
             batteryCurrentValue = (batteryDelayMillis / 1000).toFloat()
@@ -225,10 +233,11 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
                     ) {
                         Column(
-                            modifier = Modifier.padding(20.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            modifier = Modifier.padding(top = 20.dp, bottom = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(0.dp),
                         ) {
                             Row(
+                                modifier = Modifier.padding(horizontal = 20.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
@@ -261,6 +270,8 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                                 }
                             }
 
+                            Spacer(modifier = Modifier.height(12.dp))
+
                             val themeOptions = listOf(
                                 ThemeMode.LIGHT to "Light",
                                 ThemeMode.SYSTEM to "System",
@@ -268,7 +279,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                             )
 
                             SingleChoiceSegmentedButtonRow(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp),
                             ) {
                                 themeOptions.forEachIndexed { index, (mode, label) ->
                                     SegmentedButton(
@@ -290,17 +303,22 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
 
                             Spacer(modifier = Modifier.height(8.dp))
 
+                            Spacer(modifier = Modifier.height(4.dp))
+
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .hapticClickable { viewModel.setHapticFeedbackEnabled(!hapticEnabled) },
+                                    .hapticClickable { viewModel.setHapticFeedbackEnabled(!hapticEnabled) }
+                                    .padding(horizontal = 20.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    modifier = Modifier.weight(1f),
+                                 modifier = Modifier
+                                        .weight(1f)
+                                        .padding(vertical = 8.dp),
                                 ) {
                                     Box(
                                         modifier = Modifier
@@ -337,6 +355,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                                     thumbContent = {
                                         Crossfade(
                                             targetState = hapticEnabled,
+                                            animationSpec = MaterialTheme.motionScheme.slowEffectsSpec(),
                                             label = "Haptic Switch Icon",
                                         ) { enabled ->
                                             Icon(
@@ -349,6 +368,63 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                                         }
                                     },
                                 )
+                            }
+
+                            AnimatedVisibility(
+                                visible = hapticEnabled,
+                                enter = expandVertically(
+                                    animationSpec = MaterialTheme.motionScheme.slowSpatialSpec(),
+                                ) + fadeIn(
+                                    animationSpec = MaterialTheme.motionScheme.slowEffectsSpec(),
+                                ),
+                                exit = shrinkVertically(
+                                    animationSpec = MaterialTheme.motionScheme.slowSpatialSpec(),
+                                ) + fadeOut(
+                                    animationSpec = MaterialTheme.motionScheme.slowEffectsSpec(),
+                                ),
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 8.dp),
+                                ) {
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    Text(
+                                        text = "Vibration Intensity",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(bottom = 8.dp),
+                                    )
+
+                                    val intensityOptions = listOf(
+                                        VibrationIntensity.LIGHT to "Light",
+                                        VibrationIntensity.MEDIUM to "Medium",
+                                        VibrationIntensity.STRONG to "Strong",
+                                    )
+
+                                    SingleChoiceSegmentedButtonRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        intensityOptions.forEachIndexed { index, (intensity, label) ->
+                                            SegmentedButton(
+                                                shape = SegmentedButtonDefaults.itemShape(
+                                                    index = index,
+                                                    count = intensityOptions.size,
+                                                ),
+                                                onClick = rememberHapticOnClick { viewModel.setVibrationIntensity(intensity) },
+                                                selected = vibrationIntensity == intensity,
+                                            ) {
+                                                Text(
+                                                    text = label,
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    fontWeight = if (vibrationIntensity ==
+                                                        intensity
+                                                    ) FontWeight.Bold else FontWeight.Normal,
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

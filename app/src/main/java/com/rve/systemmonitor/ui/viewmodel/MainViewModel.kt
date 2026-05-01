@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rve.systemmonitor.domain.repository.SettingsRepository
 import com.rve.systemmonitor.utils.ThemeMode
+import com.rve.systemmonitor.utils.VibrationIntensity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,8 +18,9 @@ class MainViewModel @Inject constructor(settingsRepository: SettingsRepository) 
         settingsRepository.themeMode,
         settingsRepository.isSetupCompleted,
         settingsRepository.hapticFeedbackEnabled,
-    ) { theme, setupCompleted, hapticEnabled ->
-        MainUiState.Success(theme, setupCompleted, hapticEnabled)
+        settingsRepository.vibrationIntensity,
+    ) { theme, setupCompleted, hapticEnabled, vibrationIntensity ->
+        MainUiState.Success(theme, setupCompleted, hapticEnabled, vibrationIntensity)
     }.stateIn(
         scope = viewModelScope,
         initialValue = MainUiState.Loading,
@@ -28,5 +30,10 @@ class MainViewModel @Inject constructor(settingsRepository: SettingsRepository) 
 
 sealed interface MainUiState {
     data object Loading : MainUiState
-    data class Success(val themeMode: ThemeMode, val isSetupCompleted: Boolean, val hapticFeedbackEnabled: Boolean) : MainUiState
+    data class Success(
+        val themeMode: ThemeMode,
+        val isSetupCompleted: Boolean,
+        val hapticFeedbackEnabled: Boolean,
+        val vibrationIntensity: VibrationIntensity,
+    ) : MainUiState
 }

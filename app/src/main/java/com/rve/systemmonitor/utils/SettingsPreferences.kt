@@ -21,12 +21,19 @@ class SettingsPreferences(private val context: Context) {
         val MEMORY_REFRESH_DELAY_KEY = longPreferencesKey("memory_refresh_delay")
         val BATTERY_REFRESH_DELAY_KEY = longPreferencesKey("battery_refresh_delay")
         val HAPTIC_FEEDBACK_ENABLED_KEY = booleanPreferencesKey("haptic_feedback_enabled")
+        val VIBRATION_INTENSITY_KEY = stringPreferencesKey("vibration_intensity")
     }
 
     val themeModeFlow: Flow<ThemeMode> = context.dataStore.data
         .map { preferences ->
             val mode = preferences[THEME_MODE_KEY] ?: ThemeMode.SYSTEM.name
             ThemeMode.valueOf(mode)
+        }
+
+    val vibrationIntensityFlow: Flow<VibrationIntensity> = context.dataStore.data
+        .map { preferences ->
+            val intensity = preferences[VIBRATION_INTENSITY_KEY] ?: VibrationIntensity.LIGHT.name
+            VibrationIntensity.valueOf(intensity)
         }
 
     val hapticFeedbackEnabledFlow: Flow<Boolean> = context.dataStore.data
@@ -87,6 +94,12 @@ class SettingsPreferences(private val context: Context) {
     suspend fun saveHapticFeedbackEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[HAPTIC_FEEDBACK_ENABLED_KEY] = enabled
+        }
+    }
+
+    suspend fun saveVibrationIntensity(intensity: VibrationIntensity) {
+        context.dataStore.edit { preferences ->
+            preferences[VIBRATION_INTENSITY_KEY] = intensity.name
         }
     }
 }

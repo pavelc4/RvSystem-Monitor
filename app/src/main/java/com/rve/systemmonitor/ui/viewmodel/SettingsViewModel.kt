@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rve.systemmonitor.domain.repository.SettingsRepository
 import com.rve.systemmonitor.utils.ThemeMode
+import com.rve.systemmonitor.utils.VibrationIntensity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
@@ -26,6 +27,13 @@ class SettingsViewModel @Inject constructor(private val settingsRepository: Sett
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = true,
+        )
+
+    val vibrationIntensity: StateFlow<VibrationIntensity> = settingsRepository.vibrationIntensity
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = VibrationIntensity.LIGHT,
         )
 
     val cpuRefreshDelay: StateFlow<Long> = settingsRepository.cpuRefreshDelay
@@ -58,6 +66,12 @@ class SettingsViewModel @Inject constructor(private val settingsRepository: Sett
     fun setHapticFeedbackEnabled(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.setHapticFeedbackEnabled(enabled)
+        }
+    }
+
+    fun setVibrationIntensity(intensity: VibrationIntensity) {
+        viewModelScope.launch {
+            settingsRepository.setVibrationIntensity(intensity)
         }
     }
 

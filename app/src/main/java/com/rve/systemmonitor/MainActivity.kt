@@ -44,13 +44,14 @@ class MainActivity : ComponentActivity() {
                 val themeMode = successState.themeMode
                 val isSetupCompleted = successState.isSetupCompleted
                 val hapticEnabled = successState.hapticFeedbackEnabled
+                val vibrationIntensity = successState.vibrationIntensity
                 val darkTheme = when (themeMode) {
                     ThemeMode.LIGHT -> false
                     ThemeMode.DARK -> true
                     ThemeMode.SYSTEM -> isSystemInDarkTheme()
                 }
 
-                RvSystemMonitorTheme(darkTheme, hapticEnabled) {
+                RvSystemMonitorTheme(darkTheme, hapticEnabled, vibrationIntensity) {
                     AppNavigation(isSetupCompleted)
                 }
             }

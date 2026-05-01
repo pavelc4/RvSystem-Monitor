@@ -19,9 +19,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.rve.systemmonitor.ui.components.LocalHapticEnabled
+import com.rve.systemmonitor.ui.components.LocalVibrationIntensity
+import com.rve.systemmonitor.utils.VibrationIntensity
 
 @Composable
-fun RvSystemMonitorTheme(darkTheme: Boolean, hapticEnabled: Boolean = true, content: @Composable () -> Unit) {
+fun RvSystemMonitorTheme(
+    darkTheme: Boolean,
+    hapticEnabled: Boolean = true,
+    vibrationIntensity: VibrationIntensity = VibrationIntensity.LIGHT,
+    content: @Composable () -> Unit,
+) {
     val context = LocalContext.current
     val targetColorScheme = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
     val colorScheme = animateColorScheme(targetColorScheme)
@@ -37,7 +44,10 @@ fun RvSystemMonitorTheme(darkTheme: Boolean, hapticEnabled: Boolean = true, cont
         motionScheme = MotionScheme.expressive(),
         typography = appTypography,
         content = {
-            CompositionLocalProvider(LocalHapticEnabled provides hapticEnabled) {
+            CompositionLocalProvider(
+                LocalHapticEnabled provides hapticEnabled,
+                LocalVibrationIntensity provides vibrationIntensity,
+            ) {
                 content()
             }
         },

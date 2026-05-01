@@ -4,6 +4,7 @@ import android.app.Application
 import com.rve.systemmonitor.domain.repository.SettingsRepository
 import com.rve.systemmonitor.utils.SettingsPreferences
 import com.rve.systemmonitor.utils.ThemeMode
+import com.rve.systemmonitor.utils.VibrationIntensity
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,8 @@ class SettingsRepositoryImpl @Inject constructor(application: Application) : Set
     override val themeMode: Flow<ThemeMode> = settingsPreferences.themeModeFlow
 
     override val hapticFeedbackEnabled: Flow<Boolean> = settingsPreferences.hapticFeedbackEnabledFlow
+
+    override val vibrationIntensity: Flow<VibrationIntensity> = settingsPreferences.vibrationIntensityFlow
 
     override val isSetupCompleted: Flow<Boolean> = settingsPreferences.isSetupCompletedFlow
 
@@ -31,6 +34,10 @@ class SettingsRepositoryImpl @Inject constructor(application: Application) : Set
 
     override suspend fun setHapticFeedbackEnabled(enabled: Boolean) {
         settingsPreferences.saveHapticFeedbackEnabled(enabled)
+    }
+
+    override suspend fun setVibrationIntensity(intensity: VibrationIntensity) {
+        settingsPreferences.saveVibrationIntensity(intensity)
     }
 
     override suspend fun setSetupCompleted(completed: Boolean) {
