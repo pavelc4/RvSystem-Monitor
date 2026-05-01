@@ -43,8 +43,8 @@ import com.rve.systemmonitor.ui.components.chip.BadgeChip
 import com.rve.systemmonitor.ui.components.item.HelpItem
 import com.rve.systemmonitor.ui.components.item.InfoItem
 import com.rve.systemmonitor.ui.viewmodel.BatteryViewModel
-import kotlinx.coroutines.flow.emptyFlow
 import kotlin.math.abs
+import kotlinx.coroutines.flow.emptyFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,8 +111,8 @@ private fun BatteryOverviewCard(battery: Battery) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
@@ -142,12 +142,13 @@ private fun BatteryOverviewCard(battery: Battery) {
                     Text(
                         text = "${battery.level}%",
                         style = MaterialTheme.typography.displayMedium,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
                         text = battery.status,
                         style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
 
@@ -162,8 +163,8 @@ private fun BatteryOverviewCard(battery: Battery) {
                     }
                     BadgeChip(
                         text = healthText,
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        textColor = MaterialTheme.colorScheme.onSecondary,
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        textColor = MaterialTheme.colorScheme.onPrimary,
                     )
                     BadgeChip(
                         text = battery.technology,
@@ -182,8 +183,8 @@ private fun BatteryDetailsCard(battery: Battery, onHelpClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {

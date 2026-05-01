@@ -13,7 +13,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun InfoItem(label: String, value: String, modifier: Modifier = Modifier, labelColor: Color = MaterialTheme.colorScheme.onSurfaceVariant) {
+fun InfoItem(
+    modifier: Modifier = Modifier,
+    label: String,
+    labelColor: Color = MaterialTheme.colorScheme.onSurface,
+    value: String,
+    valueColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+) {
     Column(modifier = modifier) {
         Text(
             text = label,
@@ -23,6 +29,7 @@ fun InfoItem(label: String, value: String, modifier: Modifier = Modifier, labelC
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium,
+            color = valueColor,
             fontWeight = FontWeight.SemiBold,
         )
     }

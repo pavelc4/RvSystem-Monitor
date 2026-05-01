@@ -217,7 +217,7 @@ private fun StorageCard(storage: Storage) {
             Icon(
                 painter = painterResource(R.drawable.database_filled),
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .size(160.dp)
@@ -236,8 +236,8 @@ private fun StorageCard(storage: Storage) {
                 ) {
                     CircularWavyProgressIndicator(
                         progress = { storageAnimatedProgress },
-                        color = MaterialTheme.colorScheme.secondary,
-                        trackColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.2f),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f),
                         stroke = customStroke,
                         trackStroke = customStroke,
                         wavelength = 25.dp,
@@ -251,7 +251,7 @@ private fun StorageCard(storage: Storage) {
                             Text(
                                 text = "Internal Storage",
                                 style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
                             )
                             Text(
                                 text = "${storage.used} / ${storage.total} GB",
@@ -277,7 +277,7 @@ private fun StorageCard(storage: Storage) {
                 }
 
                 HorizontalDivider(
-                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.1f),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f),
                     thickness = 1.dp,
                 )
 
@@ -306,19 +306,19 @@ private fun StorageInfoItem(label: String, value: String, modifier: Modifier = M
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.4f))
             .padding(8.dp),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -345,18 +345,19 @@ private fun MemoryDetailItem(
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.tertiaryContainer)
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .clickable { onItemClick(label, description) }
             .padding(12.dp),
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onTertiaryContainer,
+            color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontWeight = FontWeight.Bold,
         )
     }
@@ -396,8 +397,8 @@ private fun MemoryCard(ram: RAM, zram: ZRAM) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
@@ -425,7 +426,7 @@ private fun MemoryCard(ram: RAM, zram: ZRAM) {
                     CircularWavyProgressIndicator(
                         progress = { ramAnimatedProgress },
                         color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
+                        trackColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f),
                         stroke = customStroke,
                         trackStroke = customStroke,
                         wavelength = 25.dp,
@@ -439,7 +440,7 @@ private fun MemoryCard(ram: RAM, zram: ZRAM) {
                             Text(
                                 text = "RAM",
                                 style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
                             )
                             Text(
                                 text = "${ram.used} / ${ram.total} GB",
@@ -452,8 +453,8 @@ private fun MemoryCard(ram: RAM, zram: ZRAM) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             BadgeChip(
                                 text = "${ram.usedPercentage}%",
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                textColor = MaterialTheme.colorScheme.onSecondary,
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                textColor = MaterialTheme.colorScheme.onPrimary,
                             )
                             BadgeChip(
                                 text = "${ram.available} GB Free",
@@ -472,8 +473,8 @@ private fun MemoryCard(ram: RAM, zram: ZRAM) {
                     ) {
                         CircularWavyProgressIndicator(
                             progress = { zramAnimatedProgress },
-                            color = MaterialTheme.colorScheme.secondary,
-                            trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f),
+                            color = MaterialTheme.colorScheme.tertiary,
+                            trackColor = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f),
                             stroke = customStroke,
                             trackStroke = customStroke,
                             wavelength = 25.dp,
@@ -487,7 +488,7 @@ private fun MemoryCard(ram: RAM, zram: ZRAM) {
                                 Text(
                                     text = "ZRAM",
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
                                 )
                                 Text(
                                     text = "${zram.used} / ${zram.total} GB",
@@ -500,13 +501,13 @@ private fun MemoryCard(ram: RAM, zram: ZRAM) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 BadgeChip(
                                     text = "${zram.usedPercentage}%",
-                                    containerColor = MaterialTheme.colorScheme.secondary,
-                                    textColor = MaterialTheme.colorScheme.onSecondary,
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    textColor = MaterialTheme.colorScheme.onPrimary,
                                 )
                                 BadgeChip(
                                     text = "${zram.available} GB Free",
-                                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                    textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    containerColor = MaterialTheme.colorScheme.tertiary,
+                                    textColor = MaterialTheme.colorScheme.onTertiary,
                                 )
                             }
                         }

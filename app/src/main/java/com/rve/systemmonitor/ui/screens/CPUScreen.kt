@@ -1,6 +1,7 @@
 package com.rve.systemmonitor.ui.screens
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -101,8 +101,8 @@ private fun CPUOverviewCard(cpu: CPU) {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
@@ -131,7 +131,7 @@ private fun CPUOverviewCard(cpu: CPU) {
                     Text(
                         text = "by ${cpu.manufacturer}",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
 
@@ -141,13 +141,13 @@ private fun CPUOverviewCard(cpu: CPU) {
                 ) {
                     BadgeChip(
                         text = "${cpu.cores} Cores",
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        textColor = MaterialTheme.colorScheme.onSecondary,
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        textColor = MaterialTheme.colorScheme.onTertiary,
                     )
                     BadgeChip(
                         text = "Peak: $peakFrequency $peakFreqUnit",
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        textColor = MaterialTheme.colorScheme.onTertiary,
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        textColor = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
 
@@ -158,11 +158,13 @@ private fun CPUOverviewCard(cpu: CPU) {
                     InfoItem(
                         label = "Architecture",
                         value = cpu.architecture,
+                        valueColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.weight(1f),
                     )
                     InfoItem(
                         label = "Board",
                         value = cpu.board,
+                        valueColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -174,6 +176,7 @@ private fun CPUOverviewCard(cpu: CPU) {
                     InfoItem(
                         label = "Hardware",
                         value = cpu.hardware,
+                        valueColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         modifier = Modifier.weight(1f),
                     )
                     Spacer(modifier = Modifier.weight(1f))
@@ -203,7 +206,8 @@ private fun CoreDetailCard(core: CoreDetail) {
             .padding(vertical = 4.dp),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface,
         ),
     ) {
         Column(
@@ -211,25 +215,32 @@ private fun CoreDetailCard(core: CoreDetail) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.primary)
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
                     Icon(
                         painter = painterResource(R.drawable.memory_filled),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(20.dp),
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "CPU Core ${core.id}",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 0.5.sp,
-                    )
                 }
+
+                Text(
+                    text = "CPU Core ${core.id}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.5.sp,
+                    modifier = Modifier.weight(1f),
+                )
 
                 BadgeChip(
                     text = core.governor.uppercase(),
@@ -277,11 +288,7 @@ private fun CoreDetailCard(core: CoreDetail) {
 }
 
 @Composable
-private fun CompactInfoChip(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
+private fun CompactInfoChip(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
