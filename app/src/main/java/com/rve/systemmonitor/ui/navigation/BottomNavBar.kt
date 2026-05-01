@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -114,13 +115,19 @@ object BottomNavBar {
 
     @Composable
     private fun BottomNavItem(backdrop: Backdrop, item: NavItem, isSelected: Boolean, onClick: () -> Unit) {
+        val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+
         val backgroundColor by animateColorAsState(
             targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else Color.Transparent,
             label = "Background Color Animation",
         )
 
         val contentColor by animateColorAsState(
-            targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onPrimaryContainer,
+            targetValue = when {
+                isSelected && isDark -> MaterialTheme.colorScheme.onPrimaryContainer
+                isSelected -> MaterialTheme.colorScheme.onPrimary
+                else -> MaterialTheme.colorScheme.onPrimaryContainer
+            },
             label = "Content Color Animation",
         )
 
