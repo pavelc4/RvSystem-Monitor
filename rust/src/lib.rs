@@ -12,6 +12,20 @@ use jni::sys::{jdoubleArray, jint, jstring};
 
 pub mod kernel;
 pub mod mm;
+pub mod drivers;
+
+/// JNI interface to retrieve Vulkan version natively.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_com_rve_systemmonitor_utils_GpuUtils_getVulkanVersionNative<'local>(
+    mut unowned_env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+) -> jstring {
+    let version = drivers::gpu::vulkan::get_vulkan_version();
+
+    unowned_env
+        .with_env(|env| Ok::<_, jni::errors::Error>(env.new_string(version)?.into_raw()))
+        .resolve::<LogErrorAndDefault>()
+}
 
 /// JNI interface to retrieve both RAM and ZRAM data in a single call.
 #[unsafe(no_mangle)]

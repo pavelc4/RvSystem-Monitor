@@ -92,7 +92,10 @@ fun HomeScreen(isActive: Boolean, viewModel: HomeViewModel = hiltViewModel()) {
                 headline = uiState.gpu.renderer,
                 subhead = "by ${uiState.gpu.vendor}",
                 iconRes = R.drawable.view_in_ar_filled,
-                badges = listOf("OpenGL ES ${uiState.gpu.glesVersion}"),
+                badges = listOf(
+                    "OpenGL ES ${uiState.gpu.glesVersion}",
+                    "Vulkan ${uiState.gpu.vulkanVersion}",
+                ),
             ),
         )
     }

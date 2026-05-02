@@ -10,6 +10,17 @@ import android.util.Log
 object GpuUtils {
     private const val TAG = "GpuUtils"
 
+    init {
+        try {
+            System.loadLibrary("rvsystem_monitor")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load Rust library: ${e.message}")
+        }
+    }
+
+    @JvmStatic
+    private external fun getVulkanVersionNative(): String
+
     fun getGpuDetails(): Pair<String, String> = runCatching {
         val display = EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY)
         val version = IntArray(2)
@@ -57,6 +68,13 @@ object GpuUtils {
         configurationInfo.glEsVersion
     }.getOrElse {
         Log.e(TAG, "getGlesVersion error: ${it.message}", it)
+        "Unknown"
+    }
+
+    fun getVulkanVersion(context: Context): String = runCatching {
+        getVulkanVersionNative()
+    }.getOrElse {
+        Log.e(TAG, "getVulkanVersion error: ${it.message}", it)
         "Unknown"
     }
 }
