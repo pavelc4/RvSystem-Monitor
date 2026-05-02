@@ -86,7 +86,7 @@ fun HomeScreen(isActive: Boolean, viewModel: HomeViewModel = hiltViewModel()) {
                         addAll(uiState.display.hdrTypes)
                     }
                 },
-                secondaryBadgeIndices = listOf(0, 1),
+                secondaryBadgeIndices = if (uiState.display.isHdrSupported) listOf(0, 1) else listOf(0),
             ),
             InfoCardData(
                 title = "Processor",
