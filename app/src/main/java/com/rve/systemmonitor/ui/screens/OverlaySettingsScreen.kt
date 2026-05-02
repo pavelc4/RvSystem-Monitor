@@ -320,6 +320,14 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                                 },
                                 modifier = Modifier.weight(1f),
                             ) {
+                                val indicatorColor by animateColorAsState(
+                                    targetValue = if (!isVerticalLayout)
+                                        MaterialTheme.colorScheme.onPrimary
+                                    else
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                    label = "Horizontal Layout Indicator Color",
+                                    animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
+                                )
                                 Row(
                                     modifier = Modifier.size(40.dp, 20.dp),
                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -329,23 +337,13 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                                             .weight(1f)
                                             .fillMaxHeight()
                                             .clip(RoundedCornerShape(2.dp))
-                                            .background(
-                                                if (!isVerticalLayout)
-                                                    MaterialTheme.colorScheme.onPrimary
-                                                else
-                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                            ),
+                                            .background(indicatorColor),
                                     )
                                     Box(
                                         modifier = Modifier.weight(1f)
                                             .fillMaxHeight()
                                             .clip(RoundedCornerShape(2.dp))
-                                            .background(
-                                                if (!isVerticalLayout)
-                                                    MaterialTheme.colorScheme.onPrimary
-                                                else
-                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                            ),
+                                            .background(indicatorColor),
                                     )
                                 }
                             }
@@ -362,6 +360,14 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                                 },
                                 modifier = Modifier.weight(1f),
                             ) {
+                                val indicatorColor by animateColorAsState(
+                                    targetValue = if (isVerticalLayout)
+                                        MaterialTheme.colorScheme.onPrimary
+                                    else
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                    label = "Vertical Layout Indicator Color",
+                                    animationSpec = MaterialTheme.motionScheme.fastEffectsSpec()
+                                )
                                 Column(
                                     modifier = Modifier.size(20.dp, 40.dp),
                                     verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -370,23 +376,13 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                                         Modifier.weight(1f)
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(2.dp))
-                                            .background(
-                                                if (isVerticalLayout)
-                                                    MaterialTheme.colorScheme.onPrimary
-                                                else
-                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                            ),
+                                            .background(indicatorColor),
                                     )
                                     Box(
                                         Modifier.weight(1f)
                                             .fillMaxWidth()
                                             .clip(RoundedCornerShape(2.dp))
-                                            .background(
-                                                if (isVerticalLayout)
-                                                    MaterialTheme.colorScheme.onPrimary
-                                                else
-                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                            ),
+                                            .background(indicatorColor),
                                     )
                                 }
                             }
@@ -748,6 +744,7 @@ private fun AppearanceSlider(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun LayoutOptionCard(
     modifier: Modifier = Modifier,
@@ -757,6 +754,9 @@ private fun LayoutOptionCard(
     onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
+    val colorSpec = MaterialTheme.motionScheme.fastEffectsSpec<Color>()
+    val dpSpec = MaterialTheme.motionScheme.fastEffectsSpec<androidx.compose.ui.unit.Dp>()
+
     val backgroundColor by animateColorAsState(
         targetValue = if (isSelected) {
             if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
@@ -764,6 +764,7 @@ private fun LayoutOptionCard(
             MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         },
         label = "Layout Option Background",
+        animationSpec = colorSpec
     )
     val contentColor by animateColorAsState(
         targetValue = if (isSelected) {
@@ -772,9 +773,20 @@ private fun LayoutOptionCard(
             if (enabled) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
         },
         label = "Layout Option Content Color",
+        animationSpec = colorSpec
     )
-    val borderStroke = if (isSelected && enabled) 2.dp else 0.dp
-    val animatedBorderStroke by animateDpAsState(targetValue = borderStroke, label = "Layout Option Border")
+
+    val animatedElevation by animateDpAsState(
+        targetValue = if (isSelected && enabled) 4.dp else 0.dp,
+        label = "Layout Option Elevation",
+        animationSpec = dpSpec
+    )
+
+    val animatedBorderWidth by animateDpAsState(
+        targetValue = if (isSelected && enabled) 2.dp else 0.dp,
+        label = "Layout Option Border Width",
+        animationSpec = dpSpec
+    )
 
     Card(
         onClick = onClick,
@@ -787,11 +799,11 @@ private fun LayoutOptionCard(
             containerColor = backgroundColor,
             contentColor = contentColor,
         ),
-        border = if (isSelected) BorderStroke(
-            width = animatedBorderStroke,
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-        ) else null,
-        elevation = CardDefaults.cardElevation(defaultElevation = if (isSelected) 4.dp else 0.dp),
+        border = BorderStroke(
+            width = animatedBorderWidth,
+            color = MaterialTheme.colorScheme.primary.copy(alpha = if (isSelected) 0.5f else 0f),
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = animatedElevation),
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
