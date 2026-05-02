@@ -1,81 +1,68 @@
-# Project Context: RvSystem-Monitor
+# RvSystem Monitor - Project Context
 
-RvSystem-Monitor is an Android system monitoring application that combines a **Jetpack Compose** frontend with a high-performance **Rust** backend. It uses **JNI (Java Native Interface)** to bridge the two, allowing for efficient parsing of Linux kernel system files (`/proc`, `/sys`) while providing a modern Material 3 Expressive UI.
+This file provides the necessary context and instructions for AI agents working on the RvSystem Monitor project.
 
-## Architecture
+## Project Overview
 
-The project is split into two main components:
+**RvSystem Monitor** is a high-performance system monitoring solution for Android. It leverages **Jetpack Compose** for a modern, fluid user interface and **Rust** for efficient, low-level hardware data parsing.
 
-- **Frontend (`app/`)**:
-    - **Framework**: Jetpack Compose (Kotlin).
-    - **Architecture**: Clean Architecture (Domain, Data, UI layers).
-    - **DI**: Dagger Hilt.
-    - **Reactive Data**: StateFlow and Coroutines for lifecycle-aware streaming.
-    - **UI**: Material 3 Expressive design with animated progress indicators.
+### Key Technologies
+- **Frontend**: Kotlin, Jetpack Compose (Material 3 Expressive), Dagger Hilt (DI), Coroutines/StateFlow.
+- **Backend**: Rust (via JNI), direct `/proc` and `/sys` file parsing.
+- **Build System**: Gradle Kotlin DSL with integration for Cargo NDK.
+- **Libraries**: Backdrop (UI), DataStore (Preferences), Splashscreen.
 
-- **Backend (`rust/`)**:
-    - **Framework**: Rust.
-    - **Organization**: Mirrors Linux kernel structure (`kernel/` for CPU, `mm/` for Memory Management).
-    - **Functionality**: High-performance parsing of sysfs and procfs.
-    - **Interface**: JNI functions mapped to Kotlin utility objects (`MemoryUtils`, `CpuUtils`). Optimized using **batch retrieval** (e.g., `getMemoryDataNative`, `getAllCoreFrequenciesNative`) to minimize context switching.
-
-- **Services**:
-    - **`SystemOverlayService`**: A foreground service that manages the floating system overlay, displaying live FPS and RAM metrics. It uses `Choreographer` for FPS and `MemoryUtils` for RAM.
+### Architecture
+The project follows **Clean Architecture** principles:
+- **`app/src/main/java/com/rve/systemmonitor/ui`**: UI components, ViewModels, and Navigation.
+- **`app/src/main/java/com/rve/systemmonitor/domain`**: Business logic and interfaces.
+- **`app/src/main/java/com/rve/systemmonitor/data`**: Implementation of repositories and data sources.
+- **`app/src/main/java/com/rve/systemmonitor/utils`**: JNI bridge declarations and utility classes.
+- **`rust/src`**: Native implementation of hardware monitoring (mirrors Linux kernel structure: `kernel/` for CPU, `mm/` for Memory).
 
 ## Building and Running
 
 ### Prerequisites
-- **Android Studio**: Ladybug or newer.
-- **Rust Toolchain**: [rustup.rs](https://rustup.rs/).
-- **Android NDK**: Version `30.0.14904198` (as specified in `app/build.gradle.kts`).
-- **cargo-ndk**: `cargo install cargo-ndk`.
+- **Android Studio** (Ladybug or newer)
+- **Rust Toolchain** ([rustup.rs](https://rustup.rs/))
+- **Android NDK** (Version `30.0.14904198` specified in `app/build.gradle.kts`)
+- **cargo-ndk**: `cargo install cargo-ndk`
 
 ### Key Commands
-
-- **Build Everything (including Rust)**:
-  ```bash
-  ./gradlew assembleDebug
-  ```
-  *(The `preBuild` task depends on `buildRustLibraries`)*
-
-- **Build Rust Libraries Individually**:
+- **Build Native Libraries**:
   ```bash
   ./gradlew :app:buildRustLibraries
   ```
-
-- **Install and Run**:
+  This task compiles Rust code for `arm64-v8a` and `armeabi-v7a` and places the `.so` files in `app/src/main/jniLibs`.
+- **Assemble Debug APK**:
   ```bash
-  ./gradlew installDebug
+  ./gradlew assembleDebug
   ```
-
-- **Format Code (Spotless/ktlint)**:
+- **Apply Code Formatting**:
   ```bash
   ./gradlew spotlessApply
   ```
-
-- **Manual Rust Build (via CLI)**:
   ```bash
-  cd rust
-  cargo ndk -t armeabi-v7a -t arm64-v8a -o ../app/src/main/jniLibs build --release
+  cd rust && cargo fmt
   ```
-
-## Project Structure
-
-- `app/`: Android application module.
-    - `src/main/java/com/rve/systemmonitor/`: Kotlin source code.
-    - `src/main/jniLibs/`: Compiled Rust `.so` libraries (output of build process).
-- `rust/`: Native monitoring backend.
-    - `src/lib.rs`: JNI entry points.
-    - `src/kernel/`: CPU monitoring logic.
-    - `src/mm/`: Memory (RAM/ZRAM) monitoring logic.
-- `gradle/libs.versions.toml`: Version catalog for dependencies.
 
 ## Development Conventions
 
-- **Clean Architecture**: Maintain separation between data sources (Rust/JNI), domain logic (Repositories/Models), and the UI layer (ViewModels/Compose).
-- **JNI Batching**: When adding new native metrics, prefer batching related data into a single JNI call (using `DoubleArray` or `jobjectArray`) to reduce overhead.
-- **Lifecycle Awareness**: Ensure data streams in `MemoryRepositoryImpl` and `CpuRepositoryImpl` are stopped when screens are inactive or the app is in the background using `WhileSubscribed`.
-- **UI Components**: Use `ScreenWrapper` for all top-level screens to ensure consistent transition effects and adaptive dimming.
-- **Styling**: Use Material 3 Expressive. Custom icons are located in `app/src/main/res/drawable/`.
-- **Debugging**: Monitor `MemoryRepository`, `CpuRepository`, and `BatteryUtils` logs in Logcat for data stream status.
-- **Formatting**: Run `./gradlew spotlessApply` before committing Kotlin changes. Rust code should follow standard `cargo fmt` conventions.
+### JNI Bridge
+- **Batch Data Retrieval**: To minimize JNI overhead, prefer retrieving data in batches (e.g., `getMemoryDataNative` returns a `doubleArray` containing all RAM and ZRAM stats).
+- **Naming Convention**: JNI functions in Rust must follow the `Java_package_name_ClassName_functionName` pattern and use `#![allow(non_snake_case)]`.
+
+### UI/UX
+- **Material 3 Expressive**: Use modern Material 3 components and adaptive layouts.
+- **Theme Support**: Dynamic Light/Dark mode and customizable haptic feedback/vibration intensity are handled via `RvSystemMonitorTheme`.
+- **Performance**: Ensure UI stays responsive even during high-frequency system updates.
+
+### Native Backend (Rust)
+- **Kernel Parity**: Organize native code to reflect the Linux kernel structure it parses.
+- **Error Handling**: Native code should be robust against missing or inaccessible `/proc` or `/sys` files.
+
+## Important Files
+- `app/build.gradle.kts`: Main Android build configuration and NDK integration.
+- `gradle/libs.versions.toml`: Centralized dependency management.
+- `rust/src/lib.rs`: JNI entry points for the native backend.
+- `app/src/main/java/com/rve/systemmonitor/MainActivity.kt`: Entry point for the Android application.

@@ -11,6 +11,29 @@
 
 ---
 
+## 📸 Screenshots
+
+<p align="center">
+  <img src="assets/screenshots/screenshot_1.jpg" width="32%" />
+  <img src="assets/screenshots/screenshot_2.jpg" width="32%" />
+  <img src="assets/screenshots/screenshot_3.jpg" width="32%" />
+</p>
+<p align="center">
+  <img src="assets/screenshots/screenshot_4.jpg" width="32%" />
+  <img src="assets/screenshots/screenshot_5.jpg" width="32%" />
+  <img src="assets/screenshots/screenshot_6.jpg" width="32%" />
+</p>
+
+---
+
+## 🧪 Join Alpha Testing
+
+We are currently in the alpha phase and looking for testers! If you'd like to help improve RvSystem Monitor, please register via our Google Form:
+
+👉 **[Register for Alpha Testing](https://forms.gle/VUpVX17sdMjPndqBA)**
+
+---
+
 ## ✨ Key Features
 
 | Category | Description |
@@ -67,21 +90,6 @@ The project adheres to **Clean Architecture** principles, ensuring a strict sepa
    ```bash
    ./gradlew assembleDebug
    ```
-
----
-
-## 📸 Screenshots
-
-<p align="center">
-  <img src="assets/screenshots/screenshot_1.jpg" width="32%" />
-  <img src="assets/screenshots/screenshot_2.jpg" width="32%" />
-  <img src="assets/screenshots/screenshot_3.jpg" width="32%" />
-</p>
-<p align="center">
-  <img src="assets/screenshots/screenshot_4.jpg" width="32%" />
-  <img src="assets/screenshots/screenshot_5.jpg" width="32%" />
-  <img src="assets/screenshots/screenshot_6.jpg" width="32%" />
-</p>
 
 ---
 
