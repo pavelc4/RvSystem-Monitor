@@ -33,6 +33,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -62,6 +63,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -85,7 +87,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val coroutineScope = rememberCoroutineScope()
-    val snapAnimationSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+    val snapAnimationSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
     val isFpsEnabled by viewModel.isFpsEnabled.collectAsStateWithLifecycle()
     val isRamEnabled by viewModel.isRamEnabled.collectAsStateWithLifecycle()
@@ -326,7 +328,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                                     else
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
                                     label = "Horizontal Layout Indicator Color",
-                                    animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
+                                    animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                                 )
                                 Row(
                                     modifier = Modifier.size(40.dp, 20.dp),
@@ -366,7 +368,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                                     else
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
                                     label = "Vertical Layout Indicator Color",
-                                    animationSpec = MaterialTheme.motionScheme.fastEffectsSpec(),
+                                    animationSpec = MaterialTheme.motionScheme.defaultEffectsSpec(),
                                 )
                                 Column(
                                     modifier = Modifier.size(20.dp, 40.dp),
@@ -493,7 +495,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.38f),
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        androidx.compose.material3.IconButton(
+                                        IconButton(
                                             onClick = rememberHapticOnClick {
                                                 viewModel.setOverlayUpdateInterval(1000L)
                                                 if (isServiceRunning) updateService(interval = 1000L)
@@ -713,7 +715,7 @@ private fun AppearanceSlider(
                     color = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primary.copy(alpha = 0.38f),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                androidx.compose.material3.IconButton(
+                IconButton(
                     onClick = rememberHapticOnClick(onReset),
                     enabled = enabled,
                     modifier = Modifier.size(24.dp),
@@ -754,8 +756,8 @@ private fun LayoutOptionCard(
     onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    val colorSpec = MaterialTheme.motionScheme.fastEffectsSpec<Color>()
-    val dpSpec = MaterialTheme.motionScheme.fastEffectsSpec<androidx.compose.ui.unit.Dp>()
+    val colorSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
+    val dpSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Dp>()
 
     val backgroundColor by animateColorAsState(
         targetValue = if (isSelected) {
