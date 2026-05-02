@@ -1,13 +1,16 @@
 package com.rve.systemmonitor.ui.screens
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -105,16 +108,38 @@ fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel
 
 @Composable
 private fun BatteryOverviewCard(battery: Battery) {
-    val batteryIcon = remember(battery.level) {
-        when {
-            battery.level >= 100 -> R.drawable.battery_android_full
-            battery.level >= 85 -> R.drawable.battery_android_6
-            battery.level >= 70 -> R.drawable.battery_android_5
-            battery.level >= 55 -> R.drawable.battery_android_4
-            battery.level >= 40 -> R.drawable.battery_android_3
-            battery.level >= 25 -> R.drawable.battery_android_2
-            battery.level >= 10 -> R.drawable.battery_android_1
-            else -> R.drawable.battery_android_0
+    val isCharging = battery.status == "Charging"
+
+    val batteryIcon = remember(battery.level, isCharging, battery.wattage) {
+        if (isCharging) {
+            when {
+                battery.wattage >= 25.0 -> R.drawable.bolt_boost_filled
+                battery.wattage >= 15.0 -> R.drawable.bolt_filled
+                else -> R.drawable.mobile_charge_filled
+            }
+        } else {
+            when {
+                battery.level >= 100 -> R.drawable.battery_android_full
+                battery.level >= 85 -> R.drawable.battery_android_6
+                battery.level >= 70 -> R.drawable.battery_android_5
+                battery.level >= 55 -> R.drawable.battery_android_4
+                battery.level >= 40 -> R.drawable.battery_android_3
+                battery.level >= 25 -> R.drawable.battery_android_2
+                battery.level >= 10 -> R.drawable.battery_android_1
+                else -> R.drawable.battery_android_0
+            }
+        }
+    }
+
+    val displayStatus = remember(battery.status, battery.wattage) {
+        if (isCharging) {
+            when {
+                battery.wattage >= 25.0 -> "Hyper Charging"
+                battery.wattage >= 15.0 -> "Fast Charging"
+                else -> "Charging"
+            }
+        } else {
+            battery.status
         }
     }
 
@@ -128,15 +153,47 @@ private fun BatteryOverviewCard(battery: Battery) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            Crossfade(
+            val chargingIcons = remember {
+                listOf(R.drawable.mobile_charge_filled, R.drawable.bolt_filled, R.drawable.bolt_boost_filled)
+            }
+
+            AnimatedContent(
                 targetState = batteryIcon,
-                label = "Battery Icon Fade",
+                transitionSpec = {
+                    val isChargingTransition = targetState in chargingIcons || initialState in chargingIcons
+                    if (isChargingTransition) {
+                        (
+                            slideInVertically(
+                                initialOffsetY = { it },
+                                animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
+                            ) + scaleIn(
+                                animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
+                            )
+                            ).togetherWith(
+                            slideOutVertically(
+                                targetOffsetY = { it },
+                                animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
+                            ) + scaleOut(
+                                animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
+                            ),
+                        )
+                    } else {
+                        fadeIn(
+                            animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
+                        ).togetherWith(
+                            fadeOut(
+                                animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
+                            ),
+                        )
+                    }
+                },
+                label = "Battery Icon Animation",
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .offset(y = 30.dp),
-            ) { iconRes ->
+            ) { icBattery ->
                 Icon(
-                    painter = painterResource(id = iconRes),
+                    painter = painterResource(id = icBattery),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
@@ -157,7 +214,7 @@ private fun BatteryOverviewCard(battery: Battery) {
                         fontWeight = FontWeight.Bold,
                     )
                     AnimatedContent(
-                        targetState = battery.status,
+                        targetState = displayStatus,
                         transitionSpec = {
                             (
                                 slideInHorizontally(
@@ -371,6 +428,7 @@ private fun BatteryHelpContent() {
     val helpItems = listOf(
         "Voltage & Temperature" to "Sourced from real-time system broadcasts via the Android BatteryManager API.",
         "Power Source & Status" to "Detected from the current charging state (AC, USB, or Wireless) via system intents.",
+        "Charging Speed" to "Estimated based on real-time wattage: Fast Charging (15W+) and Hyper Charging (25W+).",
         "Wattage (Power)" to "Calculated in real-time by multiplying Voltage (V) and Current (A).",
         "Current (mA)" to "Direct hardware reading from the battery's charge counter property.",
         "Capacity (Design/Max/Remaining)" to "Extracted from Android PowerProfile and battery charge counter calculations. " +
