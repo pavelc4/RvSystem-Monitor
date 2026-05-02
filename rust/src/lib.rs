@@ -41,7 +41,7 @@ pub extern "system" fn Java_com_rve_systemmonitor_utils_MemoryUtils_getMemoryDat
 
     unowned_env.with_env(|env| {
         let output = env.new_double_array(14)?;
-        env.set_double_array_region(&output, 0, &data)?;
+        output.set_region(env, 0, &data)?;
         Ok::<_, jni::errors::Error>(output.into_raw())
     })
     .resolve::<LogErrorAndDefault>()
@@ -69,7 +69,7 @@ pub extern "system" fn Java_com_rve_systemmonitor_utils_MemoryUtils_getRamDataNa
 
     unowned_env.with_env(|env| {
         let output = env.new_double_array(9)?;
-        env.set_double_array_region(&output, 0, &data)?;
+        output.set_region(env, 0, &data)?;
         Ok::<_, jni::errors::Error>(output.into_raw())
     })
     .resolve::<LogErrorAndDefault>()
@@ -94,7 +94,7 @@ pub extern "system" fn Java_com_rve_systemmonitor_utils_MemoryUtils_getZramDataN
 
     unowned_env.with_env(|env| {
         let output = env.new_double_array(5)?;
-        env.set_double_array_region(&output, 0, &data)?;
+        output.set_region(env, 0, &data)?;
         Ok::<_, jni::errors::Error>(output.into_raw())
     })
     .resolve::<LogErrorAndDefault>()
@@ -123,7 +123,7 @@ pub extern "system" fn Java_com_rve_systemmonitor_utils_CpuUtils_getAllCoreFrequ
 
         for (i, freq) in frequencies.into_iter().enumerate() {
             let j_freq = env.new_string(freq)?;
-            env.set_object_array_element(&array, i as usize, &j_freq)?;
+            array.set_element(env, i, &j_freq)?;
         }
 
         Ok::<_, jni::errors::Error>(array.into_raw())
