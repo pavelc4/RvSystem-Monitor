@@ -78,7 +78,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     val batteryDelayMillis by viewModel.batteryRefreshDelay.collectAsStateWithLifecycle()
 
     val coroutineScope = rememberCoroutineScope()
-    val snapAnimationSpec = MaterialTheme.motionScheme.fastEffectsSpec<Float>()
+    val snapAnimationSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
     val cpuSliderState = rememberSliderState(
         value = (cpuDelayMillis / 1000).toFloat(),
