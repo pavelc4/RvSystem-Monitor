@@ -4,7 +4,6 @@
 
 use std::fs::File;
 use std::io::{self, BufRead};
-use std::path::Path;
 
 /// Factor used to convert bytes to Gigabytes.
 const GB_FACTOR: f64 = 1_000_000_000.0;
@@ -52,15 +51,6 @@ fn format_to_two_decimals(value: f64) -> f64 {
     (value * 100.0).round() / 100.0
 }
 
-/// Helper function to read lines from a file.
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
-where
-    P: AsRef<Path>,
-{
-    let file = File::open(filename)?;
-    Ok(io::BufReader::new(file).lines())
-}
-
 /// Helper to parse the KB value from a meminfo line without extra allocations
 fn parse_kb(line: &str) -> f64 {
     line.split_whitespace()
@@ -83,8 +73,12 @@ pub fn get_memory_data() -> (RamData, ZramData) {
     let mut inactive_bytes = 0_f64;
     let mut slab_bytes = 0_f64;
 
-    if let Ok(lines) = read_lines("/proc/meminfo") {
-        for line in lines.flatten() {
+    if let Ok(file) = File::open("/proc/meminfo") {
+        let reader = io::BufReader::new(file);
+        let mut line = String::with_capacity(64);
+        let mut reader = reader;
+
+        while reader.read_line(&mut line).unwrap_or(0) > 0 {
             if line.starts_with("MemTotal:") {
                 mem_total_bytes = parse_kb(&line) * 1024.0;
             } else if line.starts_with("MemAvailable:") {
@@ -104,6 +98,7 @@ pub fn get_memory_data() -> (RamData, ZramData) {
             } else if line.starts_with("Slab:") {
                 slab_bytes = parse_kb(&line) * 1024.0;
             }
+            line.clear();
         }
     } else {
         println!("Failed to read /proc/meminfo");

@@ -33,13 +33,13 @@ pub fn get_core_count() -> i32 {
     count
 }
 
-/// Retrieves the core frequency.
-pub fn get_core_frequency(core_id: i32, freq_type: &str) -> String {
+/// Retrieves the core frequency in KHz.
+pub fn get_core_frequency(core_id: i32, freq_type: &str) -> i64 {
     let file_name = match freq_type {
         "max_info" => "cpuinfo_max_freq",
         "min_info" => "cpuinfo_min_freq",
         "cur" => "scaling_cur_freq",
-        _ => return "N/A".to_string(),
+        _ => return 0,
     };
 
     let path = format!(
@@ -47,10 +47,9 @@ pub fn get_core_frequency(core_id: i32, freq_type: &str) -> String {
         core_id, file_name
     );
     if let Ok(content) = fs::read_to_string(path) {
-        let freq_khz: i64 = content.trim().parse().unwrap_or(0);
-        format_frequency(freq_khz)
+        content.trim().parse().unwrap_or(0)
     } else {
-        "N/A".to_string()
+        0
     }
 }
 
@@ -63,13 +62,4 @@ pub fn get_core_governor(core_id: i32) -> String {
     fs::read_to_string(path)
         .map(|s| s.trim().to_string())
         .unwrap_or_else(|_| "N/A".to_string())
-}
-
-/// Formats frequency from KHz to MHz/GHz.
-fn format_frequency(freq_khz: i64) -> String {
-    if freq_khz >= 1_000_000 {
-        format!("{:.2} GHz", freq_khz as f64 / 1_000_000.0)
-    } else {
-        format!("{} MHz", freq_khz / 1000)
-    }
 }

@@ -47,25 +47,36 @@ class CpuRepositoryImpl @Inject constructor(private val settingsRepository: Sett
             val architecture = CpuUtils.getArchitecture()
 
             val staticCoreInfo = (0 until cores).map { i ->
-                val min = CpuUtils.getCoreFrequency(i, "min_info")
-                val max = CpuUtils.getCoreFrequency(i, "max_info")
+                val minKhz = CpuUtils.getCoreFrequencyKhz(i, "min_info")
+                val maxKhz = CpuUtils.getCoreFrequencyKhz(i, "max_info")
                 val governor = CpuUtils.getCoreGovernor(i)
-                Triple(min, max, governor)
+                CoreStaticInfo(
+                    minFreq = CpuUtils.formatFrequency(minKhz),
+                    maxFreq = CpuUtils.formatFrequency(maxKhz),
+                    minFreqKhz = minKhz,
+                    maxFreqKhz = maxKhz,
+                    governor = governor,
+                )
             }
 
             while (true) {
                 if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Updated")
                 val coreDetails = mutableListOf<CoreDetail>()
-                val currentFrequencies = CpuUtils.getAllCoreFrequencies()
+                val currentFrequenciesKhz = CpuUtils.getAllCoreFrequenciesKhz()
 
                 for (i in 0 until cores) {
+                    val currentKhz = currentFrequenciesKhz.getOrElse(i) { 0L }
+                    val static = staticCoreInfo[i]
                     coreDetails.add(
                         CoreDetail(
                             id = i,
-                            currentFreq = currentFrequencies.getOrElse(i) { "N/A" },
-                            minFreq = staticCoreInfo[i].first,
-                            maxFreq = staticCoreInfo[i].second,
-                            governor = staticCoreInfo[i].third,
+                            currentFreq = CpuUtils.formatFrequency(currentKhz),
+                            minFreq = static.minFreq,
+                            maxFreq = static.maxFreq,
+                            currentFreqKhz = currentKhz,
+                            minFreqKhz = static.minFreqKhz,
+                            maxFreqKhz = static.maxFreqKhz,
+                            governor = static.governor,
                         ),
                     )
                 }
@@ -87,4 +98,12 @@ class CpuRepositoryImpl @Inject constructor(private val settingsRepository: Sett
             if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Stopped")
         }.flowOn(Dispatchers.IO)
     }
+
+    private data class CoreStaticInfo(
+        val minFreq: String,
+        val maxFreq: String,
+        val minFreqKhz: Long,
+        val maxFreqKhz: Long,
+        val governor: String,
+    )
 }

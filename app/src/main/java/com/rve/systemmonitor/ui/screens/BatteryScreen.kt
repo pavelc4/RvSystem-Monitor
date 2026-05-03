@@ -204,9 +204,15 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                 )
             }
 
-            val actualMax = if (history.isNotEmpty()) history.maxOf { abs(it.mA) }.toFloat() else 0f
-            val renderMax = actualMax.coerceAtLeast(1000f)
-            val minValInHistory = if (history.isNotEmpty()) history.minOf { abs(it.mA) }.toFloat() else 0f
+            val actualMax = remember(history) {
+                if (history.isNotEmpty()) history.maxOf { abs(it.mA) }.toFloat() else 0f
+            }
+            val renderMax = remember(actualMax) {
+                actualMax.coerceAtLeast(1000f)
+            }
+            val minValInHistory = remember(history) {
+                if (history.isNotEmpty()) history.minOf { abs(it.mA) }.toFloat() else 0f
+            }
 
             val enterTransition = if (hasAnimated) EnterTransition.None else fadeIn(animationSpec = tween(1000))
 
@@ -225,6 +231,7 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                 ) {
                     val width = constraints.maxWidth.toFloat()
                     val height = constraints.maxHeight.toFloat()
+                    val density = LocalDensity.current
 
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         if (history.size > 1) {
@@ -318,24 +325,22 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                                     "Charging"
                                 ) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
 
-                                with(LocalDensity.current) {
-                                    val xOffset = (width * xRatio).toDp()
-                                    val yOffset = (height * (1f - yRatio)).toDp()
+                                val xOffset = with(density) { (width * xRatio).toDp() }
+                                val yOffset = with(density) { (height * (1f - yRatio)).toDp() }
 
-                                    Text(
-                                        text = statusLabel,
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontWeight = FontWeight.Black,
-                                            fontSize = 8.sp,
+                                Text(
+                                    text = statusLabel,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 8.sp,
+                                    ),
+                                    color = statusColor.copy(alpha = 0.8f),
+                                    modifier = Modifier
+                                        .offset(
+                                            x = xOffset - 20.dp,
+                                            y = yOffset - 14.dp,
                                         ),
-                                        color = statusColor.copy(alpha = 0.8f),
-                                        modifier = Modifier
-                                            .offset(
-                                                x = xOffset - 20.dp,
-                                                y = yOffset - 14.dp,
-                                            ),
-                                    )
-                                }
+                                )
                             }
                         }
                     }

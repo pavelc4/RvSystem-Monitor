@@ -8,7 +8,7 @@
 use jni::EnvUnowned;
 use jni::errors::LogErrorAndDefault;
 use jni::objects::{JClass, JString};
-use jni::sys::{jdoubleArray, jint, jstring};
+use jni::sys::{jdoubleArray, jint, jlong, jlongArray, jstring};
 
 pub mod drivers;
 pub mod kernel;
@@ -124,7 +124,7 @@ pub extern "system" fn Java_com_rve_systemmonitor_utils_CpuUtils_getAllCoreFrequ
 >(
     mut unowned_env: EnvUnowned<'local>,
     _class: JClass<'local>,
-) -> jni::sys::jobjectArray {
+) -> jlongArray {
     let cores = kernel::cpu::get_core_count();
     let mut frequencies = Vec::with_capacity(cores as usize);
 
@@ -134,17 +134,9 @@ pub extern "system" fn Java_com_rve_systemmonitor_utils_CpuUtils_getAllCoreFrequ
 
     unowned_env
         .with_env(|env| {
-            let class_name = jni::strings::JNIString::try_from("java/lang/String").unwrap();
-            let class = env.find_class(class_name)?;
-            let initial_element = env.new_string("")?;
-            let array = env.new_object_array(cores, &class, &initial_element)?;
-
-            for (i, freq) in frequencies.into_iter().enumerate() {
-                let j_freq = env.new_string(freq)?;
-                array.set_element(env, i, &j_freq)?;
-            }
-
-            Ok::<_, jni::errors::Error>(array.into_raw())
+            let output = env.new_long_array(cores as usize)?;
+            output.set_region(env, 0, &frequencies)?;
+            Ok::<_, jni::errors::Error>(output.into_raw())
         })
         .resolve::<LogErrorAndDefault>()
 }
@@ -160,19 +152,18 @@ pub extern "system" fn Java_com_rve_systemmonitor_utils_CpuUtils_getCoreCountNat
         .resolve::<LogErrorAndDefault>()
 }
 
-/// JNI interface to retrieve core frequency.
+/// JNI interface to retrieve core frequency in KHz.
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_com_rve_systemmonitor_utils_CpuUtils_getCoreFrequencyNative<'local>(
     mut unowned_env: EnvUnowned<'local>,
     _class: JClass<'local>,
     core_id: jint,
     freq_type: JString<'local>,
-) -> jstring {
+) -> jlong {
     unowned_env
         .with_env(|env| {
             let freq_type: String = freq_type.try_to_string(env)?;
-            let freq = kernel::cpu::get_core_frequency(core_id, &freq_type);
-            Ok::<_, jni::errors::Error>(env.new_string(freq)?.into_raw())
+            Ok::<_, jni::errors::Error>(kernel::cpu::get_core_frequency(core_id, &freq_type))
         })
         .resolve::<LogErrorAndDefault>()
 }

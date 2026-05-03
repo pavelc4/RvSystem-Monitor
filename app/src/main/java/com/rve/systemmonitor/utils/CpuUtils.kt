@@ -15,10 +15,18 @@ object CpuUtils {
     }
 
     @JvmStatic
-    private external fun getAllCoreFrequenciesNative(): Array<String>
+    private external fun getAllCoreFrequenciesNative(): LongArray
+
+    fun getAllCoreFrequenciesKhz(): LongArray = runCatching {
+        getAllCoreFrequenciesNative()
+    }.getOrElse {
+        Log.e(TAG, "getAllCoreFrequenciesKhz: ${it.message}", it)
+        LongArray(0)
+    }
 
     fun getAllCoreFrequencies(): Array<String> = runCatching {
-        getAllCoreFrequenciesNative()
+        val frequencies = getAllCoreFrequenciesKhz()
+        frequencies.map { formatFrequency(it) }.toTypedArray()
     }.getOrElse {
         Log.e(TAG, "getAllCoreFrequencies: ${it.message}", it)
         emptyArray()
@@ -28,10 +36,18 @@ object CpuUtils {
     private external fun getCoreCountNative(): Int
 
     @JvmStatic
-    private external fun getCoreFrequencyNative(coreId: Int, type: String): String
+    private external fun getCoreFrequencyNative(coreId: Int, type: String): Long
 
     @JvmStatic
     private external fun getCoreGovernorNative(coreId: Int): String
+
+    fun formatFrequency(freqKhz: Long): String {
+        return if (freqKhz >= 1_000_000) {
+            String.format("%.2f GHz", freqKhz / 1_000_000.0)
+        } else {
+            "${freqKhz / 1000} MHz"
+        }
+    }
 
     fun getSocManufacturer(): String = runCatching {
         val manufacturer = Build.SOC_MANUFACTURER
@@ -72,8 +88,12 @@ object CpuUtils {
         0
     }
 
-    fun getCoreFrequency(coreId: Int, type: String): String = runCatching {
+    fun getCoreFrequencyKhz(coreId: Int, type: String): Long = runCatching {
         getCoreFrequencyNative(coreId, type)
+    }.getOrElse { 0L }
+
+    fun getCoreFrequency(coreId: Int, type: String): String = runCatching {
+        formatFrequency(getCoreFrequencyKhz(coreId, type))
     }.getOrElse { "N/A" }
 
     fun getCoreGovernor(coreId: Int): String = runCatching {

@@ -19,5 +19,8 @@ data class CoreDetail(
     val currentFreq: String = "0 MHz",
     val minFreq: String = "0 MHz",
     val maxFreq: String = "0 MHz",
+    val currentFreqKhz: Long = 0,
+    val minFreqKhz: Long = 0,
+    val maxFreqKhz: Long = 0,
     val governor: String = "unknown",
 )

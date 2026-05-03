@@ -1,5 +1,8 @@
 package com.rve.systemmonitor.domain.model
 
+import androidx.compose.runtime.Immutable
+
+@Immutable
 data class Battery(
     val level: Int = 0,
     val health: String = "Unknown",

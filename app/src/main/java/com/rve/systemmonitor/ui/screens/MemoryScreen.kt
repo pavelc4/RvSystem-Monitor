@@ -110,6 +110,12 @@ fun MemoryScreen(isActive: Boolean, viewModel: MemoryViewModel = hiltViewModel()
 
 @Composable
 private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) {
+    val cached = remember(ram.cached) { formatMemoryValue(ram.cached) }
+    val buffers = remember(ram.buffers) { formatMemoryValue(ram.buffers) }
+    val active = remember(ram.active) { formatMemoryValue(ram.active) }
+    val inactive = remember(ram.inactive) { formatMemoryValue(ram.inactive) }
+    val slab = remember(ram.slab) { formatMemoryValue(ram.slab) }
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -126,7 +132,7 @@ private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) 
         ) {
             MemoryDetailItem(
                 label = "Cached",
-                value = formatMemoryValue(ram.cached),
+                value = cached,
                 description = "Memory used for the file system cache to speed up file access. " +
                     "This memory can be reclaimed by the system if needed.",
                 onItemClick = onItemClick,
@@ -134,7 +140,7 @@ private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) 
             )
             MemoryDetailItem(
                 label = "Buffers",
-                value = formatMemoryValue(ram.buffers),
+                value = buffers,
                 description = "Memory used for raw disk blocks and metadata. Usually very small on Android devices.",
                 onItemClick = onItemClick,
                 modifier = Modifier.weight(1f),
@@ -147,7 +153,7 @@ private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) 
         ) {
             MemoryDetailItem(
                 label = "Active",
-                value = formatMemoryValue(ram.active),
+                value = active,
                 description = "Memory that is currently being used or has been used very recently. " +
                     "This memory is unlikely to be reclaimed soon.",
                 onItemClick = onItemClick,
@@ -155,7 +161,7 @@ private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) 
             )
             MemoryDetailItem(
                 label = "Inactive",
-                value = formatMemoryValue(ram.inactive),
+                value = inactive,
                 description = "Memory that has not been used for a while. " +
                     "It is a prime candidate for being moved to Swap/ZRAM or reclaimed.",
                 onItemClick = onItemClick,
@@ -165,7 +171,7 @@ private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) 
 
         MemoryDetailItem(
             label = "Slab",
-            value = formatMemoryValue(ram.slab),
+            value = slab,
             description = "Memory used by the kernel's internal data structures and objects.",
             onItemClick = onItemClick,
             modifier = Modifier.fillMaxWidth(),
