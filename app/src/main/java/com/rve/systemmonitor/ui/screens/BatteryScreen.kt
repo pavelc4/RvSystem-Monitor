@@ -2,6 +2,7 @@ package com.rve.systemmonitor.ui.screens
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -48,7 +49,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -72,6 +72,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rve.systemmonitor.R
 import com.rve.systemmonitor.domain.model.Battery
+import com.rve.systemmonitor.domain.model.BatteryDataPoint
 import com.rve.systemmonitor.ui.components.chip.BadgeChip
 import com.rve.systemmonitor.ui.components.haptic.rememberHapticOnClick
 import com.rve.systemmonitor.ui.components.item.HelpItem
@@ -80,8 +81,6 @@ import com.rve.systemmonitor.ui.navigation.TRANSITION_DURATION
 import com.rve.systemmonitor.ui.viewmodel.BatteryViewModel
 import kotlin.math.abs
 import kotlinx.coroutines.flow.emptyFlow
-
-data class BatteryDataPoint(val mA: Int, val status: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,17 +92,8 @@ fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel
         remember { emptyFlow<Battery>() }.collectAsStateWithLifecycle(initialBatteryInfo)
     }
 
-    val currentHistory = remember { mutableStateListOf<BatteryDataPoint>() }
-    val maxHistoryPoints by viewModel.graphHistorySeconds.collectAsStateWithLifecycle()
-
-    LaunchedEffect(batteryInfo.current, batteryInfo.status) {
-        if (isActive) {
-            currentHistory.add(BatteryDataPoint(batteryInfo.current, batteryInfo.status))
-            if (currentHistory.size > maxHistoryPoints) {
-                currentHistory.removeAt(0)
-            }
-        }
-    }
+    val batteryHistory by viewModel.batteryHistory.collectAsStateWithLifecycle()
+    val hasAlreadyAnimated = remember { viewModel.hasAnimated }
 
     var showHelpSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
@@ -133,7 +123,12 @@ fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel
         }
 
         item {
-            ChargingSpeedCard(battery = batteryInfo, history = currentHistory)
+            ChargingSpeedCard(
+                battery = batteryInfo,
+                history = batteryHistory,
+                hasAnimated = hasAlreadyAnimated,
+                onAnimated = { viewModel.markAsAnimated() },
+            )
         }
 
         item {
@@ -146,7 +141,7 @@ fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel
 }
 
 @Composable
-private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>) {
+private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>, hasAnimated: Boolean, onAnimated: () -> Unit) {
     val currentMA = abs(battery.current)
     val isCharging = battery.status == "Charging"
     val isDischarging = battery.status == "Discharging"
@@ -215,11 +210,16 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>)
             val renderMax = actualMax.coerceAtLeast(1000f)
             val minValInHistory = if (history.isNotEmpty()) history.minOf { abs(it.mA) }.toFloat() else 0f
 
+            val enterTransition = if (hasAnimated) EnterTransition.None else fadeIn(animationSpec = tween(1000))
+
             AnimatedVisibility(
                 visible = history.size >= 2,
-                enter = fadeIn(animationSpec = tween(1000)),
+                enter = enterTransition,
                 exit = fadeOut(),
             ) {
+                LaunchedEffect(Unit) {
+                    onAnimated()
+                }
                 BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxWidth()
