@@ -10,9 +10,9 @@ use jni::errors::LogErrorAndDefault;
 use jni::objects::{JClass, JString};
 use jni::sys::{jdoubleArray, jint, jstring};
 
+pub mod drivers;
 pub mod kernel;
 pub mod mm;
-pub mod drivers;
 
 /// JNI interface to retrieve Vulkan version natively.
 #[unsafe(no_mangle)]

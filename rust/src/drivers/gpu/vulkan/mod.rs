@@ -1,4 +1,4 @@
-use libc::{dlopen, dlsym, RTLD_NOW};
+use libc::{RTLD_NOW, dlopen, dlsym};
 use std::ptr;
 
 type VkInstance = *mut std::ffi::c_void;
@@ -40,22 +40,44 @@ pub fn get_vulkan_version() -> String {
         // Load functions with explicit null checks
         let vk_create_instance_ptr = dlsym(handle, "vkCreateInstance\0".as_ptr() as *const _);
         let vk_destroy_instance_ptr = dlsym(handle, "vkDestroyInstance\0".as_ptr() as *const _);
-        let vk_enumerate_physical_devices_ptr = dlsym(handle, "vkEnumeratePhysicalDevices\0".as_ptr() as *const _);
-        let vk_get_physical_device_properties_ptr = dlsym(handle, "vkGetPhysicalDeviceProperties\0".as_ptr() as *const _);
-        let vk_enumerate_instance_version_ptr = dlsym(handle, "vkEnumerateInstanceVersion\0".as_ptr() as *const _);
+        let vk_enumerate_physical_devices_ptr =
+            dlsym(handle, "vkEnumeratePhysicalDevices\0".as_ptr() as *const _);
+        let vk_get_physical_device_properties_ptr = dlsym(
+            handle,
+            "vkGetPhysicalDeviceProperties\0".as_ptr() as *const _,
+        );
+        let vk_enumerate_instance_version_ptr =
+            dlsym(handle, "vkEnumerateInstanceVersion\0".as_ptr() as *const _);
 
-        let vk_enumerate_instance_version: Option<extern "system" fn(*mut u32) -> i32> = 
-            if !vk_enumerate_instance_version_ptr.is_null() { Some(std::mem::transmute(vk_enumerate_instance_version_ptr)) } else { None };
+        let vk_enumerate_instance_version: Option<extern "system" fn(*mut u32) -> i32> =
+            if !vk_enumerate_instance_version_ptr.is_null() {
+                Some(std::mem::transmute(vk_enumerate_instance_version_ptr))
+            } else {
+                None
+            };
 
-        if vk_create_instance_ptr.is_null() || vk_destroy_instance_ptr.is_null() || 
-           vk_enumerate_physical_devices_ptr.is_null() || vk_get_physical_device_properties_ptr.is_null() {
+        if vk_create_instance_ptr.is_null()
+            || vk_destroy_instance_ptr.is_null()
+            || vk_enumerate_physical_devices_ptr.is_null()
+            || vk_get_physical_device_properties_ptr.is_null()
+        {
             return query_instance_version(vk_enumerate_instance_version);
         }
 
-        let vk_create_instance: extern "system" fn(*const VkInstanceCreateInfo, *const std::ffi::c_void, *mut VkInstance) -> VkResult = std::mem::transmute(vk_create_instance_ptr);
-        let vk_destroy_instance: extern "system" fn(VkInstance, *const std::ffi::c_void) = std::mem::transmute(vk_destroy_instance_ptr);
-        let vk_enumerate_physical_devices: extern "system" fn(VkInstance, *mut u32, *mut VkPhysicalDevice) -> VkResult = std::mem::transmute(vk_enumerate_physical_devices_ptr);
-        let vk_get_physical_device_properties: extern "system" fn(VkPhysicalDevice, *mut u8) = std::mem::transmute(vk_get_physical_device_properties_ptr);
+        let vk_create_instance: extern "system" fn(
+            *const VkInstanceCreateInfo,
+            *const std::ffi::c_void,
+            *mut VkInstance,
+        ) -> VkResult = std::mem::transmute(vk_create_instance_ptr);
+        let vk_destroy_instance: extern "system" fn(VkInstance, *const std::ffi::c_void) =
+            std::mem::transmute(vk_destroy_instance_ptr);
+        let vk_enumerate_physical_devices: extern "system" fn(
+            VkInstance,
+            *mut u32,
+            *mut VkPhysicalDevice,
+        ) -> VkResult = std::mem::transmute(vk_enumerate_physical_devices_ptr);
+        let vk_get_physical_device_properties: extern "system" fn(VkPhysicalDevice, *mut u8) =
+            std::mem::transmute(vk_get_physical_device_properties_ptr);
 
         // Create a minimal instance
         let app_info = VkApplicationInfo {
@@ -82,14 +104,18 @@ pub fn get_vulkan_version() -> String {
         let mut instance: VkInstance = ptr::null_mut();
         if vk_create_instance(&create_info, ptr::null(), &mut instance) == 0 {
             let mut device_count: u32 = 0;
-            if vk_enumerate_physical_devices(instance, &mut device_count, ptr::null_mut()) == 0 && device_count > 0 {
+            if vk_enumerate_physical_devices(instance, &mut device_count, ptr::null_mut()) == 0
+                && device_count > 0
+            {
                 let mut devices = vec![ptr::null_mut(); device_count as usize];
-                if vk_enumerate_physical_devices(instance, &mut device_count, devices.as_mut_ptr()) == 0 {
-                    // VkPhysicalDeviceProperties is a large struct (~824+ bytes). 
+                if vk_enumerate_physical_devices(instance, &mut device_count, devices.as_mut_ptr())
+                    == 0
+                {
+                    // VkPhysicalDeviceProperties is a large struct (~824+ bytes).
                     // apiVersion is the first 4 bytes. We provide a buffer to avoid stack corruption.
-                    let mut properties_buffer = [0u8; 1024]; 
+                    let mut properties_buffer = [0u8; 1024];
                     vk_get_physical_device_properties(devices[0], properties_buffer.as_mut_ptr());
-                    
+
                     // Extract apiVersion (first 4 bytes, little endian)
                     let api_version = u32::from_le_bytes([
                         properties_buffer[0],
