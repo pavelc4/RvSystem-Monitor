@@ -12,6 +12,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/**
+ * A simple item displaying a label and a corresponding value.
+ *
+ * @param modifier The [Modifier] to be applied to the item.
+ * @param label The label text.
+ * @param labelColor The color of the label text.
+ * @param value The value text.
+ * @param valueColor The color of the value text.
+ */
 @Composable
 fun InfoItem(
     modifier: Modifier = Modifier,
@@ -35,6 +44,13 @@ fun InfoItem(
     }
 }
 
+/**
+ * An item used in help or information sections, featuring a title and a detailed description.
+ *
+ * @param title The title of the help item.
+ * @param description The detailed description text.
+ * @param modifier The [Modifier] to be applied to the item.
+ */
 @Composable
 fun HelpItem(title: String, description: String, modifier: Modifier = Modifier) {
     Column(

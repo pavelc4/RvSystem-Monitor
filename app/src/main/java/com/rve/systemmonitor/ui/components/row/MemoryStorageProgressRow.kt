@@ -26,6 +26,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.rve.systemmonitor.ui.components.chip.BadgeChip
 
+/**
+ * A row component that displays a progress indicator along with detailed memory or storage information.
+ *
+ * @param label The label for the data (e.g., "RAM", "Internal Storage").
+ * @param usedValue The current used value in GB.
+ * @param totalValue The total capacity value in GB.
+ * @param usedPercentage The percentage of capacity currently in use.
+ * @param freeValue The available free space in GB.
+ * @param progressColor The color of the progress indicator.
+ * @param modifier The [Modifier] to be applied to the row.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MemoryStorageProgressRow(

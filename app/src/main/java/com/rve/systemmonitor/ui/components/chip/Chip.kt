@@ -13,6 +13,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
+/**
+ * A custom chip component used to display status or category information.
+ *
+ * @param text The text to be displayed inside the chip.
+ * @param containerColor The background color of the chip.
+ * @param textColor The color of the text inside the chip.
+ * @param modifier The [Modifier] to be applied to the chip.
+ */
 @Composable
 fun BadgeChip(text: String, containerColor: Color, textColor: Color, modifier: Modifier = Modifier) {
     Box(

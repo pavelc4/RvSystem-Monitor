@@ -32,6 +32,19 @@ import androidx.compose.ui.unit.dp
 import com.rve.systemmonitor.R
 import com.rve.systemmonitor.ui.components.haptic.rememberHapticOnClick
 
+/**
+ * Data class representing the content of an information overview card.
+ *
+ * @property title The title of the card.
+ * @property headline The main headline text.
+ * @property subhead The subhead text.
+ * @property iconRes The resource ID of the main icon.
+ * @property backgroundIconRes The resource ID of the background icon (defaults to [iconRes]).
+ * @property backgroundIconOffset The vertical offset of the background icon.
+ * @property badges A list of strings to be displayed as badges.
+ * @property secondaryBadgeIndices Indices of badges that should use the secondary color scheme.
+ * @property onHelpClick Optional callback for a help icon click.
+ */
 data class InfoCardData(
     val title: String,
     val headline: String,
@@ -44,6 +57,12 @@ data class InfoCardData(
     val onHelpClick: (() -> Unit)? = null,
 )
 
+/**
+ * A composable that displays an overview card with information, an icon, and optional badges.
+ *
+ * @param data The [InfoCardData] containing the content to be displayed.
+ * @param modifier The [Modifier] to be applied to the card.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun InfoOverviewCard(data: InfoCardData, modifier: Modifier = Modifier) {
