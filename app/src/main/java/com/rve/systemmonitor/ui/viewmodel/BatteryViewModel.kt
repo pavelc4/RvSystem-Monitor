@@ -12,8 +12,8 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
-import kotlinx.coroutines.flow.scan
 import kotlinx.coroutines.flow.stateIn
 
 @OptIn(FlowPreview::class)
@@ -33,17 +33,17 @@ class BatteryViewModel @Inject constructor(batteryRepository: BatteryRepository,
             initialValue = 60,
         )
 
+    private val _historyList = mutableListOf<BatteryDataPoint>()
+
     val batteryHistory: StateFlow<List<BatteryDataPoint>> = batteryInfo
         .sample(1000)
-        .scan(emptyList<BatteryDataPoint>()) { accumulator, info ->
-            val newList = accumulator.toMutableList()
-            newList.add(BatteryDataPoint(info.current, info.status))
+        .map { info ->
+            _historyList.add(BatteryDataPoint(info.current, info.status))
             val maxHistory = graphHistorySeconds.value
-            if (newList.size > maxHistory) {
-                newList.takeLast(maxHistory)
-            } else {
-                newList
+            if (_historyList.size > maxHistory) {
+                _historyList.subList(0, _historyList.size - maxHistory).clear()
             }
+            _historyList.toList()
         }
         .combine(graphHistorySeconds) { history, maxHistory ->
             if (history.size > maxHistory) history.takeLast(maxHistory) else history
@@ -51,7 +51,7 @@ class BatteryViewModel @Inject constructor(batteryRepository: BatteryRepository,
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList(),
+            initialValue = _historyList.toList(),
         )
 
     private var _hasAnimated = false
