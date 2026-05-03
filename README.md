@@ -40,10 +40,12 @@ We are currently in the alpha phase and looking for testers! If you'd like to he
 | :--- | :--- |
 | **🔋 Battery Intelligence** | Live tracking of Wattage (W), cycle counts (Android 14+), health percentage, and precise Deep Sleep vs. Uptime metrics. |
 | **🖥️ System Overlay** | A draggable, low-overhead floating monitor for real-time FPS and RAM metrics. Fully customizable update intervals. |
+| **🎮 GPU & Graphics** | Retrieval of GPU renderer, vendor, and supported OpenGL ES & Vulkan versions directly through the EGL context and native drivers. |
 | **⚙️ CPU Dynamics** | Detailed per-core monitoring including current, minimum, and maximum frequencies and scaling governors. |
 | **🧠 Memory & ZRAM** | High-precision tracking of RAM and ZRAM usage, including cached, buffers, and kernel slab memory. |
-| **⚡ Native Performance** | Optimized Rust backend that parses kernel files (`/proc`, `/sys`) directly with efficient JNI batching. |
-| **🎨 Expressive UI** | Built with Material 3 Expressive, featuring adaptive layouts and sophisticated screen transitions. |
+| **⚡ Native Performance** | Optimized Rust backend that parses kernel files (`/proc`, `/sys`) and interacts with hardware drivers directly with efficient JNI batching. |
+| **🎨 Expressive UI** | Built with Material 3 Expressive, featuring adaptive layouts, sophisticated screen transitions, and optimized recomposition. |
+| **📖 Fully Documented** | Extensive KDoc documentation for UI components and idiomatic Rust documentation for the backend. |
 
 ---
 
@@ -53,8 +55,27 @@ The project adheres to **Clean Architecture** principles, ensuring a strict sepa
 
 ### The Hybrid Core
 - **Frontend (Kotlin)**: Orchestrates UI state using **Dagger Hilt** for DI and **Coroutines/StateFlow** for reactive data streams. It features a custom `ScreenWrapper` for advanced visual effects.
-- **Backend (Rust)**: Handles heavy lifting and system parsing. It mirrors the Linux kernel's structure (`kernel/` for CPU, `mm/` for Memory) to provide an idiomatic and high-performance data source.
+- **Backend (Rust)**: Handles heavy lifting and system parsing. It mirrors the Linux kernel's structure (`kernel/` for CPU, `mm/` for Memory, and `drivers/` for GPU) to provide an idiomatic and high-performance data source.
 - **JNI Bridge**: A custom-built bridge optimized for **batch data retrieval**, minimizing the costly context switching between the JVM and Native code.
+
+---
+
+## 📂 Project Structure
+
+| Directory/File | Description |
+| :--- | :--- |
+| **`app/`** | **Main Android Module** |
+| `├── data/` | Implementation of repositories and JNI-linked data sources. |
+| `├── domain/` | Pure business logic: models and repository interfaces. |
+| `├── ui/` | Jetpack Compose screens, ViewModels, and Material 3 theme. |
+| `└── utils/` | JNI bridge declarations and helper utility classes. |
+| **`rust/`** | **Native Monitoring Backend** |
+| `├── drivers/` | Hardware-specific logic (Vulkan versioning, GPU details). |
+| `├── kernel/` | Core system monitoring (CPU scaling, core frequencies). |
+| `├── mm/` | Memory Management (RAM usage, ZRAM statistics). |
+| `└── lib.rs` | Main entry point for the JNI bridge implementation. |
+| **`gradle/`** | Project-wide build configurations and version catalogs. |
+| **`assets/`** | Screenshots and media assets for documentation. |
 
 ---
 

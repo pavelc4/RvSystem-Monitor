@@ -7,7 +7,8 @@ Monitor Android application.
 
 The Rust component is responsible for gathering low-level system metrics (CPU, Memory, and ZRAM
 data) by interacting with the Linux kernel via `/proc` and `/sys` filesystems. It exposes these
-metrics to the Android app through **JNI (Java Native Interface)**.
+metrics to the Android app through **JNI (Java Native Interface)** using optimized numeric data
+transfer to minimize overhead.
 
 The project structure is intentionally organized to mirror the **Linux Kernel** organization.
 
@@ -19,6 +20,8 @@ The project structure is intentionally organized to mirror the **Linux Kernel** 
       governors.
 - `src/mm/`: Memory Management module (matches Linux kernel's `mm/` directory).
     - `memory.rs`: Logic for parsing `/proc/meminfo` and calculating RAM/ZRAM statistics.
+- `src/drivers/`: Hardware driver interfaces.
+    - `gpu/vulkan/`: Logic for retrieving Vulkan version and driver details.
 
 ## Building
 
@@ -42,10 +45,10 @@ This project is typically built as a dynamic library (`.so`) for Android using `
 To build for the primary Android architectures:
 
 ```bash
-cargo ndk -t arm64-v8a -t armeabi-v7a build --release
+cargo ndk -t arm64-v8a -t armeabi-v7a -o ../app/src/main/jniLibs build --release
 ```
 
-The resulting libraries will be located in `target/` and are automatically managed by the Gradle
+The resulting libraries will be located in `app/src/main/jniLibs` and are managed by the Gradle
 task `:app:buildRustLibraries`.
 
 ## JNI Integration
@@ -61,11 +64,21 @@ The Rust functions are mapped to the corresponding Kotlin utility objects.
 
 ### CPU Utilities (`CpuUtils`)
 
-| Rust Function                     | Kotlin Native Method                   |
-|:----------------------------------|:---------------------------------------|
-| `Java_..._getCoreCountNative`     | `getCoreCountNative()`                 |
-| `Java_..._getCoreFrequencyNative` | `getCoreFrequencyNative(coreId, type)` |
-| `Java_..._getCoreGovernorNative`  | `getCoreGovernorNative(coreId)`        |
+| Rust Function                            | Kotlin Native Method                   |
+|:-----------------------------------------|:---------------------------------------|
+| `Java_..._getCoreCountNative`            | `getCoreCountNative()`                 |
+| `Java_..._getCoreFrequencyNative`        | `getCoreFrequencyNative(coreId, type)` |
+| `Java_..._getCoreGovernorNative`         | `getCoreGovernorNative(coreId)`        |
+| `Java_..._getAllCoreFrequenciesNative`   | `getAllCoreFrequenciesNative()`        |
+
+### GPU Utilities (`GpuUtils`)
+
+| Rust Function                      | Kotlin Native Method      |
+|:-----------------------------------|:--------------------------|
+| `Java_..._getVulkanVersionNative`  | `getVulkanVersionNative()`|
+
+> **Optimization Note**: `getAllCoreFrequenciesNative` returns a `jlongArray` (KHz) to avoid
+> the overhead of string allocation and array-of-objects manipulation at the JNI level.
 
 ## Documentation
 
