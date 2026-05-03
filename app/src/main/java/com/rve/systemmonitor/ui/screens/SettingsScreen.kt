@@ -106,11 +106,13 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     var batteryAnimateJob: Job? by remember { mutableStateOf(null) }
 
     val historySliderState = rememberSliderState(
-        value = batteryGraphHistorySeconds.toFloat(),
-        steps = 28,
-        valueRange = 10f..300f,
+        value = batteryGraphHistorySeconds.toFloat().coerceIn(30f, 300f),
+        steps = 8,
+        valueRange = 30f..300f,
     )
-    var historyCurrentValue by rememberSaveable(batteryGraphHistorySeconds) { mutableFloatStateOf(batteryGraphHistorySeconds.toFloat()) }
+    var historyCurrentValue by rememberSaveable(batteryGraphHistorySeconds) {
+        mutableFloatStateOf(batteryGraphHistorySeconds.toFloat().coerceIn(30f, 300f))
+    }
     var historyAnimateJob: Job? by remember { mutableStateOf(null) }
 
     LaunchedEffect(cpuDelayMillis) {
@@ -136,8 +138,9 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
 
     LaunchedEffect(batteryGraphHistorySeconds) {
         if (!historySliderState.isDragging) {
-            historySliderState.value = batteryGraphHistorySeconds.toFloat()
-            historyCurrentValue = batteryGraphHistorySeconds.toFloat()
+            val coercedValue = batteryGraphHistorySeconds.toFloat().coerceIn(30f, 300f)
+            historySliderState.value = coercedValue
+            historyCurrentValue = coercedValue
         }
     }
 
