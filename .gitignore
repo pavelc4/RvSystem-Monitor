@@ -20,3 +20,4 @@ local.properties
 /app/src/main/jniLibs/
 R8_Configuration_Analysis.md
 signing.properties
+/*.jks
