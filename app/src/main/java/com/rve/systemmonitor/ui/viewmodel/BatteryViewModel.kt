@@ -58,5 +58,12 @@ class BatteryViewModel @Inject constructor(batteryRepository: BatteryRepository,
                     _batteryHistory.value = currentList
                 }
             }.launchIn(viewModelScope)
+
+        graphHistorySeconds
+            .onEach { maxHistory ->
+                if (_batteryHistory.value.size > maxHistory) {
+                    _batteryHistory.value = _batteryHistory.value.takeLast(maxHistory)
+                }
+            }.launchIn(viewModelScope)
     }
 }
