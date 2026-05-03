@@ -207,7 +207,7 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                 if (history.isNotEmpty()) history.maxOf { abs(it.mA) }.toFloat() else 0f
             }
             val renderMax = remember(actualMax) {
-                actualMax
+                actualMax.coerceAtLeast(1000f)
             }
             val minValInHistory = remember(history) {
                 if (history.isNotEmpty()) history.minOf { abs(it.mA) }.toFloat() else 0f
