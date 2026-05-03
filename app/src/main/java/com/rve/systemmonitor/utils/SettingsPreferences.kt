@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -20,6 +21,7 @@ class SettingsPreferences(private val context: Context) {
         val CPU_REFRESH_DELAY_KEY = longPreferencesKey("cpu_refresh_delay")
         val MEMORY_REFRESH_DELAY_KEY = longPreferencesKey("memory_refresh_delay")
         val BATTERY_REFRESH_DELAY_KEY = longPreferencesKey("battery_refresh_delay")
+        val BATTERY_GRAPH_HISTORY_KEY = intPreferencesKey("battery_graph_history")
         val HAPTIC_FEEDBACK_ENABLED_KEY = booleanPreferencesKey("haptic_feedback_enabled")
         val VIBRATION_INTENSITY_KEY = stringPreferencesKey("vibration_intensity")
     }
@@ -61,6 +63,11 @@ class SettingsPreferences(private val context: Context) {
             preferences[BATTERY_REFRESH_DELAY_KEY] ?: 1000L
         }
 
+    val batteryGraphHistorySecondsFlow: Flow<Int> = context.dataStore.data
+        .map { preferences ->
+            preferences[BATTERY_GRAPH_HISTORY_KEY] ?: 60
+        }
+
     suspend fun saveThemeMode(mode: ThemeMode) {
         context.dataStore.edit { preferences ->
             preferences[THEME_MODE_KEY] = mode.name
@@ -88,6 +95,12 @@ class SettingsPreferences(private val context: Context) {
     suspend fun saveBatteryRefreshDelay(delayMillis: Long) {
         context.dataStore.edit { preferences ->
             preferences[BATTERY_REFRESH_DELAY_KEY] = delayMillis
+        }
+    }
+
+    suspend fun saveBatteryGraphHistorySeconds(seconds: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[BATTERY_GRAPH_HISTORY_KEY] = seconds
         }
     }
 

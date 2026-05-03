@@ -76,6 +76,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     val cpuDelayMillis by viewModel.cpuRefreshDelay.collectAsStateWithLifecycle()
     val memoryDelayMillis by viewModel.memoryRefreshDelay.collectAsStateWithLifecycle()
     val batteryDelayMillis by viewModel.batteryRefreshDelay.collectAsStateWithLifecycle()
+    val batteryGraphHistorySeconds by viewModel.batteryGraphHistorySeconds.collectAsStateWithLifecycle()
 
     val coroutineScope = rememberCoroutineScope()
     val snapAnimationSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
@@ -104,6 +105,14 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     var batteryCurrentValue by rememberSaveable(batteryDelayMillis) { mutableFloatStateOf((batteryDelayMillis / 1000).toFloat()) }
     var batteryAnimateJob: Job? by remember { mutableStateOf(null) }
 
+    val historySliderState = rememberSliderState(
+        value = batteryGraphHistorySeconds.toFloat(),
+        steps = 28,
+        valueRange = 10f..300f,
+    )
+    var historyCurrentValue by rememberSaveable(batteryGraphHistorySeconds) { mutableFloatStateOf(batteryGraphHistorySeconds.toFloat()) }
+    var historyAnimateJob: Job? by remember { mutableStateOf(null) }
+
     LaunchedEffect(cpuDelayMillis) {
         if (!cpuSliderState.isDragging) {
             cpuSliderState.value = (cpuDelayMillis / 1000).toFloat()
@@ -122,6 +131,13 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
         if (!batterySliderState.isDragging) {
             batterySliderState.value = (batteryDelayMillis / 1000).toFloat()
             batteryCurrentValue = (batteryDelayMillis / 1000).toFloat()
+        }
+    }
+
+    LaunchedEffect(batteryGraphHistorySeconds) {
+        if (!historySliderState.isDragging) {
+            historySliderState.value = batteryGraphHistorySeconds.toFloat()
+            historyCurrentValue = batteryGraphHistorySeconds.toFloat()
         }
     }
 
@@ -188,6 +204,28 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                 batterySliderState.value = value
             }
             viewModel.setBatteryRefreshDelay(batteryCurrentValue.toLong() * 1000)
+        }
+    }
+
+    historySliderState.shouldAutoSnap = false
+    historySliderState.onValueChange = rememberHapticOnValueChange { newValue ->
+        historyCurrentValue = newValue
+        if (historySliderState.isDragging) {
+            historyAnimateJob?.cancel()
+            historySliderState.value = newValue
+        }
+    }
+
+    historySliderState.onValueChangeFinished = {
+        historyAnimateJob = coroutineScope.launch {
+            animate(
+                initialValue = historySliderState.value,
+                targetValue = historyCurrentValue,
+                animationSpec = snapAnimationSpec,
+            ) { value, _ ->
+                historySliderState.value = value
+            }
+            viewModel.setBatteryGraphHistorySeconds(historyCurrentValue.toInt())
         }
     }
 
@@ -681,6 +719,95 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                                     track = {
                                         SliderDefaults.Track(
                                             sliderState = batterySliderState,
+                                            modifier = Modifier.height(36.dp),
+                                            trackCornerSize = 12.dp,
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                    }
+
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(MaterialTheme.colorScheme.primary),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.timeline_rounded),
+                                        contentDescription = "Graph History Icon",
+                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                    )
+                                }
+
+                                Column {
+                                    Text(
+                                        text = "Battery Graph History",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        text = "Set how much data to show on the graph",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = "History Duration",
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    val durationText = if (historyCurrentValue >= 60) {
+                                        val minutes = historyCurrentValue.toInt() / 60
+                                        val seconds = historyCurrentValue.toInt() % 60
+                                        if (seconds == 0) "${minutes}m" else "${minutes}m ${seconds}s"
+                                    } else {
+                                        "${historyCurrentValue.toInt()}s"
+                                    }
+                                    Text(
+                                        text = durationText,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
+
+                                Slider(
+                                    state = historySliderState,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    track = {
+                                        SliderDefaults.Track(
+                                            sliderState = historySliderState,
                                             modifier = Modifier.height(36.dp),
                                             trackCornerSize = 12.dp,
                                         )

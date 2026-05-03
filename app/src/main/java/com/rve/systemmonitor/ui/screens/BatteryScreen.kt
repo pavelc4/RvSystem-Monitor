@@ -1,7 +1,14 @@
 package com.rve.systemmonitor.ui.screens
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -12,14 +19,17 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,17 +46,28 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rve.systemmonitor.R
@@ -60,6 +81,8 @@ import com.rve.systemmonitor.ui.viewmodel.BatteryViewModel
 import kotlin.math.abs
 import kotlinx.coroutines.flow.emptyFlow
 
+data class BatteryDataPoint(val mA: Int, val status: String)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel()) {
@@ -68,6 +91,18 @@ fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel
         viewModel.batteryInfo.collectAsStateWithLifecycle()
     } else {
         remember { emptyFlow<Battery>() }.collectAsStateWithLifecycle(initialBatteryInfo)
+    }
+
+    val currentHistory = remember { mutableStateListOf<BatteryDataPoint>() }
+    val maxHistoryPoints by viewModel.graphHistorySeconds.collectAsStateWithLifecycle()
+
+    LaunchedEffect(batteryInfo.current, batteryInfo.status) {
+        if (isActive) {
+            currentHistory.add(BatteryDataPoint(batteryInfo.current, batteryInfo.status))
+            if (currentHistory.size > maxHistoryPoints) {
+                currentHistory.removeAt(0)
+            }
+        }
     }
 
     var showHelpSheet by remember { mutableStateOf(false) }
@@ -98,10 +133,216 @@ fun BatteryScreen(isActive: Boolean, viewModel: BatteryViewModel = hiltViewModel
         }
 
         item {
+            ChargingSpeedCard(battery = batteryInfo, history = currentHistory)
+        }
+
+        item {
             BatteryDetailsCard(
                 battery = batteryInfo,
                 onHelpClick = { showHelpSheet = true },
             )
+        }
+    }
+}
+
+@Composable
+private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>) {
+    val currentMA = abs(battery.current)
+    val isCharging = battery.status == "Charging"
+    val isDischarging = battery.status == "Discharging"
+
+    val speedLabel = when {
+        isCharging -> "Charging Speed"
+        isDischarging -> "Discharging Speed"
+        else -> "Current Speed"
+    }
+
+    val accentColor = MaterialTheme.colorScheme.primary
+
+    val infiniteTransition = rememberInfiniteTransition(label = "PulseTransition")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = if (battery.wattage >= 25.0) 1.05f else 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "PulseScale",
+    )
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp).animateContentSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column {
+                    Text(
+                        text = speedLabel,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        text = if (battery.current != 0) "$currentMA mA" else "0 mA",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = accentColor,
+                        fontFamily = FontFamily.Monospace,
+                    )
+                }
+
+                BadgeChip(
+                    text = String.format(LocalLocale.current.platformLocale, "%.2f W", battery.wattage),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    textColor = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.scale(pulseScale),
+                )
+            }
+
+            val actualMax = if (history.isNotEmpty()) history.maxOf { abs(it.mA) }.toFloat() else 0f
+            val renderMax = actualMax.coerceAtLeast(1000f)
+            val minValInHistory = if (history.isNotEmpty()) history.minOf { abs(it.mA) }.toFloat() else 0f
+
+            AnimatedVisibility(
+                visible = history.size >= 2,
+                enter = fadeIn(animationSpec = tween(1000)),
+                exit = fadeOut(),
+            ) {
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp),
+                ) {
+                    val width = constraints.maxWidth.toFloat()
+                    val height = constraints.maxHeight.toFloat()
+
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        if (history.size > 1) {
+                            val minVal = 0f
+                            val range = renderMax - minVal
+                            val stepX = size.width / (history.size - 1)
+
+                            fun getY(value: Int): Float {
+                                return size.height - ((abs(value).toFloat() - minVal) / range * size.height)
+                            }
+
+                            val path = Path()
+                            path.moveTo(0f, getY(history[0].mA))
+
+                            for (i in 0 until history.size - 1) {
+                                val x1 = i * stepX
+                                val y1 = getY(history[i].mA)
+                                val x2 = (i + 1) * stepX
+                                val y2 = getY(history[i + 1].mA)
+
+                                val controlPoint1X = x1 + (x2 - x1) / 2
+                                val controlPoint1Y = y1
+                                val controlPoint2X = x1 + (x2 - x1) / 2
+                                val controlPoint2Y = y2
+
+                                path.cubicTo(
+                                    controlPoint1X,
+                                    controlPoint1Y,
+                                    controlPoint2X,
+                                    controlPoint2Y,
+                                    x2,
+                                    y2,
+                                )
+                            }
+
+                            drawPath(
+                                path = path,
+                                color = accentColor,
+                                style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round),
+                            )
+
+                            val fillPath = Path().apply {
+                                addPath(path)
+                                lineTo(size.width, size.height)
+                                lineTo(0f, size.height)
+                                close()
+                            }
+                            drawPath(
+                                path = fillPath,
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(accentColor.copy(alpha = 0.4f), Color.Transparent),
+                                    endY = size.height,
+                                ),
+                            )
+                        }
+                    }
+
+                    if (history.size >= 2) {
+                        Text(
+                            text = "MAX: ${actualMax.toInt()} mA",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(top = 4.dp, start = 4.dp),
+                        )
+                        Text(
+                            text = "MIN: ${minValInHistory.toInt()} mA",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(bottom = 4.dp, start = 4.dp),
+                        )
+
+                        history.forEachIndexed { index, point ->
+                            if (index > 0 && point.status != history[index - 1].status) {
+                                val xRatio = index.toFloat() / (history.size - 1)
+                                val yRatio = (abs(point.mA).toFloat() / renderMax).coerceIn(0f, 1f)
+
+                                val statusLabel = when (point.status) {
+                                    "Charging",
+                                    -> "CHARGING"
+
+                                    "Discharging",
+                                    -> "DISCHARGING"
+
+                                    else -> point.status.uppercase()
+                                }
+                                val statusColor = if (point.status ==
+                                    "Charging"
+                                ) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+
+                                with(LocalDensity.current) {
+                                    val xOffset = (width * xRatio).toDp()
+                                    val yOffset = (height * (1f - yRatio)).toDp()
+
+                                    Text(
+                                        text = statusLabel,
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 8.sp,
+                                        ),
+                                        color = statusColor.copy(alpha = 0.8f),
+                                        modifier = Modifier
+                                            .offset(
+                                                x = xOffset - 20.dp,
+                                                y = yOffset - 14.dp,
+                                            ),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -217,13 +458,15 @@ private fun BatteryOverviewCard(battery: Battery) {
                         targetState = displayStatus,
                         transitionSpec = {
                             (
-                                slideInHorizontally(
+                                slideInVertically(
+                                    initialOffsetY = { -it },
                                     animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
                                 ) + scaleIn(
                                     animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
                                 )
                                 ).togetherWith(
-                                slideOutHorizontally(
+                                slideOutVertically(
+                                    targetOffsetY = { -it },
                                     animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
                                 ) + scaleOut(
                                     animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
@@ -358,32 +601,6 @@ private fun BatteryDetailsCard(battery: Battery, onHelpClick: () -> Unit) {
                         )
                     }
                 }
-                val currentMA = abs(battery.current)
-                val isCharging = battery.status == "Charging"
-                val isDischarging = battery.status == "Discharging"
-
-                val speedLabel = when {
-                    isCharging -> "Charging Speed"
-                    isDischarging -> "Discharging Speed"
-                    else -> "Current Speed"
-                }
-
-                InfoItem(
-                    label = speedLabel,
-                    value = if (battery.current != 0) "$currentMA mA" else "0 mA",
-                    modifier = Modifier.weight(1f),
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                InfoItem(
-                    label = "Wattage",
-                    value = String.format(LocalLocale.current.platformLocale, "%.2f W", battery.wattage),
-                    modifier = Modifier.weight(1f),
-                )
                 InfoItem(
                     label = "Cycle Count",
                     value = if (battery.cycleCount >= 0) "${battery.cycleCount}" else "Unknown",

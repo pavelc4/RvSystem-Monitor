@@ -12,6 +12,7 @@ interface SettingsRepository {
     val cpuRefreshDelay: Flow<Long>
     val memoryRefreshDelay: Flow<Long>
     val batteryRefreshDelay: Flow<Long>
+    val batteryGraphHistorySeconds: Flow<Int>
     suspend fun setThemeMode(mode: ThemeMode)
     suspend fun setHapticFeedbackEnabled(enabled: Boolean)
     suspend fun setVibrationIntensity(intensity: VibrationIntensity)
@@ -19,4 +20,5 @@ interface SettingsRepository {
     suspend fun setCpuRefreshDelay(delayMillis: Long)
     suspend fun setMemoryRefreshDelay(delayMillis: Long)
     suspend fun setBatteryRefreshDelay(delayMillis: Long)
+    suspend fun setBatteryGraphHistorySeconds(seconds: Int)
 }
