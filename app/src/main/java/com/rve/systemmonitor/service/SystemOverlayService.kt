@@ -28,6 +28,8 @@ class SystemOverlayService : Service() {
 
     private var showFps = true
     private var showRam = true
+    private var showRamPercentage = false
+    private var showRamGb = false
     private var overlayTextSize = 14f
     private var overlayBgOpacity = 0.5f
     private var overlayPadding = 16
@@ -56,15 +58,25 @@ class SystemOverlayService : Service() {
 
                     if (showRam) {
                         val ram = MemoryUtils.getRamData()
-                        metrics.add(
-                            String.format(
-                                Locale.US,
-                                "RAM: %.1f / %.1f GB (%.0f%%)",
-                                ram.used,
-                                ram.total,
-                                ram.usedPercentage,
-                            ),
-                        )
+                        val ramText = when {
+                            showRamGb && showRamPercentage -> {
+                                String.format(Locale.US, "%.1f/%.1f GB (%.0f%%)", ram.used, ram.total, ram.usedPercentage)
+                            }
+
+                            showRamGb -> {
+                                String.format(Locale.US, "%.1f/%.1f GB", ram.used, ram.total)
+                            }
+
+                            showRamPercentage -> {
+                                String.format(Locale.US, "%.0f%%", ram.usedPercentage)
+                            }
+
+                            else -> {
+                                // Default fallback if both false but showRam is true
+                                String.format(Locale.US, "%.1f/%.1f GB (%.0f%%)", ram.used, ram.total, ram.usedPercentage)
+                            }
+                        }
+                        metrics.add("RAM: $ramText")
                     }
 
                     val separator = if (isVerticalLayout) "\n" else " | "
@@ -87,6 +99,8 @@ class SystemOverlayService : Service() {
         updateDelayNanos = delayMillis * 1_000_000L
         showFps = intent?.getBooleanExtra("show_fps", true) ?: true
         showRam = intent?.getBooleanExtra("show_ram", true) ?: true
+        showRamPercentage = intent?.getBooleanExtra("show_ram_percentage", false) ?: false
+        showRamGb = intent?.getBooleanExtra("show_ram_gb", false) ?: false
 
         overlayTextSize = intent?.getFloatExtra("text_size", 14f) ?: 14f
         overlayBgOpacity = intent?.getFloatExtra("bg_opacity", 0.5f) ?: 0.5f

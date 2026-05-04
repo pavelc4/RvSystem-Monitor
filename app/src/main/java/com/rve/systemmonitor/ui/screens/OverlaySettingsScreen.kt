@@ -90,7 +90,8 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
     val snapAnimationSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
     val isFpsEnabled by viewModel.isFpsEnabled.collectAsStateWithLifecycle()
-    val isRamEnabled by viewModel.isRamEnabled.collectAsStateWithLifecycle()
+    val isRamPercentageEnabled by viewModel.isRamPercentageEnabled.collectAsStateWithLifecycle()
+    val isRamGbEnabled by viewModel.isRamGbEnabled.collectAsStateWithLifecycle()
     val updateIntervalMillis by viewModel.overlayUpdateInterval.collectAsStateWithLifecycle()
     val textSize by viewModel.overlayTextSize.collectAsStateWithLifecycle()
     val bgOpacity by viewModel.overlayBgOpacity.collectAsStateWithLifecycle()
@@ -99,7 +100,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
     val isVerticalLayout by viewModel.isVerticalLayout.collectAsStateWithLifecycle()
     val cornerRadius by viewModel.overlayCornerRadius.collectAsStateWithLifecycle()
 
-    val isAnyMetricEnabled = isFpsEnabled || isRamEnabled
+    val isAnyMetricEnabled = isFpsEnabled || isRamPercentageEnabled || isRamGbEnabled
     val appearanceAlpha by animateFloatAsState(
         targetValue = if (isAnyMetricEnabled) 1f else 0.5f,
         label = "Appearance Alpha Animation",
@@ -119,7 +120,8 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
 
     fun updateService(
         fps: Boolean = isFpsEnabled,
-        ram: Boolean = isRamEnabled,
+        ramPercentage: Boolean = isRamPercentageEnabled,
+        ramGb: Boolean = isRamGbEnabled,
         interval: Long = updateIntervalMillis,
         size: Float = textSize,
         opacity: Float = bgOpacity,
@@ -128,12 +130,15 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
         vertical: Boolean = isVerticalLayout,
         radius: Int = cornerRadius,
     ) {
-        if (fps || ram) {
+        val ramEnabled = ramPercentage || ramGb
+        if (fps || ramEnabled) {
             if (Settings.canDrawOverlays(context)) {
                 val intent = Intent(context, SystemOverlayService::class.java).apply {
                     putExtra("update_delay", interval)
                     putExtra("show_fps", fps)
-                    putExtra("show_ram", ram)
+                    putExtra("show_ram", ramEnabled)
+                    putExtra("show_ram_percentage", ramPercentage)
+                    putExtra("show_ram_gb", ramGb)
                     putExtra("text_size", size)
                     putExtra("bg_opacity", opacity)
                     putExtra("padding", padd)
@@ -272,22 +277,43 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                     )
 
                     MetricToggleCard(
-                        title = "RAM Usage",
-                        description = "Show real-time memory usage",
+                        title = "RAM Usage (GB)",
+                        description = "Show real-time used and total RAM in GB",
                         icon = R.drawable.memory_alt_filled,
-                        isEnabled = isRamEnabled,
+                        isEnabled = isRamGbEnabled,
                         hasPermission = hasOverlayPermission,
                         onClick = rememberHapticOnClick {
-                            if (!hasOverlayPermission && !isRamEnabled) {
+                            if (!hasOverlayPermission && !isRamGbEnabled) {
                                 val intent = Intent(
                                     Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                                     "package:${context.packageName}".toUri(),
                                 )
                                 context.startActivity(intent)
                             } else {
-                                val nextState = !isRamEnabled
-                                viewModel.setRamEnabled(nextState)
-                                updateService(ram = nextState)
+                                val nextState = !isRamGbEnabled
+                                viewModel.setRamGbEnabled(nextState)
+                                updateService(ramGb = nextState)
+                            }
+                        },
+                    )
+
+                    MetricToggleCard(
+                        title = "RAM Percentage",
+                        description = "Show real-time percentage RAM usage",
+                        icon = R.drawable.memory_alt_filled,
+                        isEnabled = isRamPercentageEnabled,
+                        hasPermission = hasOverlayPermission,
+                        onClick = rememberHapticOnClick {
+                            if (!hasOverlayPermission && !isRamPercentageEnabled) {
+                                val intent = Intent(
+                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    "package:${context.packageName}".toUri(),
+                                )
+                                context.startActivity(intent)
+                            } else {
+                                val nextState = !isRamPercentageEnabled
+                                viewModel.setRamPercentageEnabled(nextState)
+                                updateService(ramPercentage = nextState)
                             }
                         },
                     )

@@ -27,6 +27,20 @@ class OverlaySettingsViewModel @Inject constructor(private val overlayRepository
             initialValue = false,
         )
 
+    val isRamPercentageEnabled: StateFlow<Boolean> = overlayRepository.isRamPercentageEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false,
+        )
+
+    val isRamGbEnabled: StateFlow<Boolean> = overlayRepository.isRamGbEnabled
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false,
+        )
+
     val overlayUpdateInterval: StateFlow<Long> = overlayRepository.overlayUpdateInterval
         .stateIn(
             scope = viewModelScope,
@@ -85,6 +99,18 @@ class OverlaySettingsViewModel @Inject constructor(private val overlayRepository
     fun setRamEnabled(enabled: Boolean) {
         viewModelScope.launch {
             overlayRepository.setRamEnabled(enabled)
+        }
+    }
+
+    fun setRamPercentageEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            overlayRepository.setRamPercentageEnabled(enabled)
+        }
+    }
+
+    fun setRamGbEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            overlayRepository.setRamGbEnabled(enabled)
         }
     }
 
