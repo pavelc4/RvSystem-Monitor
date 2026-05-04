@@ -2,7 +2,6 @@ package com.rve.systemmonitor.utils
 
 import android.content.Context
 import android.util.Log
-import android.view.WindowManager
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -18,8 +17,7 @@ object DisplayUtils {
     }
 
     fun getRefreshRate(context: Context): Int = runCatching {
-        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        windowManager.defaultDisplay.refreshRate.toInt()
+        context.display.refreshRate.toInt()
     }.getOrElse {
         Log.e(TAG, "getRefreshRate: ${it.message}", it)
         0
@@ -47,10 +45,7 @@ object DisplayUtils {
 
     fun getHdrCapabilities(context: Context): Pair<Boolean, List<String>> {
         return try {
-            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val display = windowManager.defaultDisplay
-            val hdrCapabilities = display.hdrCapabilities ?: return false to emptyList()
-            val supportedTypes = hdrCapabilities.supportedHdrTypes
+            val supportedTypes = context.display.mode.supportedHdrTypes
 
             val types = mutableListOf<String>()
             for (type in supportedTypes) {
