@@ -2,6 +2,7 @@ package com.rve.systemmonitor.ui.components.chip
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -34,6 +35,34 @@ fun BadgeChip(text: String, containerColor: Color, textColor: Color, modifier: M
             style = MaterialTheme.typography.labelMedium,
             color = textColor,
             fontWeight = FontWeight.Bold,
+        )
+    }
+}
+
+/**
+ * A compact chip used to display a label and a value, typically in a grid or row.
+ *
+ * @param label The label text.
+ * @param value The value text.
+ * @param modifier The [Modifier] to be applied to the chip.
+ */
+@Composable
+fun CompactInfoChip(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .padding(4.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }

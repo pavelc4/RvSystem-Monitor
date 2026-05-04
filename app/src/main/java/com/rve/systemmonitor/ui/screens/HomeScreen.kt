@@ -26,7 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rve.systemmonitor.R
 import com.rve.systemmonitor.ui.components.card.InfoCardData
 import com.rve.systemmonitor.ui.components.card.InfoOverviewCard
-import com.rve.systemmonitor.ui.components.item.HelpItem
+import com.rve.systemmonitor.ui.components.dialog.HelpBottomSheetContent
 import com.rve.systemmonitor.ui.viewmodel.HomeUiState
 import com.rve.systemmonitor.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.flow.emptyFlow
@@ -140,29 +140,5 @@ private fun HomeHelpContent() {
             "from the device's GPU through the EGL context.",
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .padding(bottom = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Text(
-            text = "Data Sources",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-        )
-
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            items(helpItems) { (title, description) ->
-                HelpItem(
-                    title = title,
-                    description = description,
-                )
-            }
-        }
-    }
+    HelpBottomSheetContent(helpItems = helpItems)
 }

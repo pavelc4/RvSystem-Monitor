@@ -41,7 +41,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rve.systemmonitor.R
 import com.rve.systemmonitor.domain.model.CPU
 import com.rve.systemmonitor.domain.model.CoreDetail
+import com.rve.systemmonitor.ui.components.card.OverviewCard
 import com.rve.systemmonitor.ui.components.chip.BadgeChip
+import com.rve.systemmonitor.ui.components.chip.CompactInfoChip
 import com.rve.systemmonitor.ui.components.item.InfoItem
 import com.rve.systemmonitor.ui.viewmodel.CPUViewModel
 import kotlinx.coroutines.flow.emptyFlow
@@ -95,16 +97,8 @@ private fun CPUOverviewCard(cpu: CPU) {
 
     val peakFreqUnit = cpu.coreDetails.firstOrNull()?.maxFreq?.substringAfter(" ") ?: "MHz"
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+    OverviewCard(
+        backgroundIcon = {
             Icon(
                 painter = painterResource(R.drawable.memory),
                 contentDescription = null,
@@ -115,75 +109,72 @@ private fun CPUOverviewCard(cpu: CPU) {
                     .offset(y = 30.dp)
                     .alpha(0.20f),
             )
+        },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = cpu.model,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = "by ${cpu.manufacturer}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
 
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = cpu.model,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    Text(
-                        text = "by ${cpu.manufacturer}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
+                BadgeChip(
+                    text = "${cpu.cores} Cores",
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    textColor = MaterialTheme.colorScheme.onTertiary,
+                )
+                BadgeChip(
+                    text = "Peak: $peakFrequency $peakFreqUnit",
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    textColor = MaterialTheme.colorScheme.onPrimary,
+                )
+                BadgeChip(
+                    text = String.format("%.1f °C", cpu.temperature),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    textColor = MaterialTheme.colorScheme.onPrimary,
+                )
+            }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    BadgeChip(
-                        text = "${cpu.cores} Cores",
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        textColor = MaterialTheme.colorScheme.onTertiary,
-                    )
-                    BadgeChip(
-                        text = "Peak: $peakFrequency $peakFreqUnit",
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        textColor = MaterialTheme.colorScheme.onPrimary,
-                    )
-                    BadgeChip(
-                        text = String.format("%.1f °C", cpu.temperature),
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        textColor = MaterialTheme.colorScheme.onPrimary,
-                    )
-                }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                InfoItem(
+                    label = "Architecture",
+                    value = cpu.architecture,
+                    valueColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.weight(1f),
+                )
+                InfoItem(
+                    label = "Board",
+                    value = cpu.board,
+                    valueColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.weight(1f),
+                )
+            }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    InfoItem(
-                        label = "Architecture",
-                        value = cpu.architecture,
-                        valueColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.weight(1f),
-                    )
-                    InfoItem(
-                        label = "Board",
-                        value = cpu.board,
-                        valueColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    InfoItem(
-                        label = "Hardware",
-                        value = cpu.hardware,
-                        valueColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                InfoItem(
+                    label = "Hardware",
+                    value = cpu.hardware,
+                    valueColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(modifier = Modifier.weight(1f))
             }
         }
     }
@@ -296,26 +287,5 @@ private fun CoreDetailCard(core: CoreDetail) {
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun CompactInfoChip(label: String, value: String, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .padding(4.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
     }
 }

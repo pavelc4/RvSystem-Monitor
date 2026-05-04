@@ -60,7 +60,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.painterResource
@@ -72,9 +71,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rve.systemmonitor.R
 import com.rve.systemmonitor.domain.model.Battery
 import com.rve.systemmonitor.domain.model.BatteryDataPoint
+import com.rve.systemmonitor.ui.components.card.OverviewCard
 import com.rve.systemmonitor.ui.components.chip.BadgeChip
+import com.rve.systemmonitor.ui.components.dialog.HelpBottomSheetContent
 import com.rve.systemmonitor.ui.components.haptic.rememberHapticOnClick
-import com.rve.systemmonitor.ui.components.item.HelpItem
 import com.rve.systemmonitor.ui.components.item.InfoItem
 import com.rve.systemmonitor.ui.navigation.TRANSITION_DURATION
 import com.rve.systemmonitor.ui.viewmodel.BatteryViewModel
@@ -180,7 +180,9 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
-            modifier = Modifier.padding(20.dp).animateContentSize(),
+            modifier = Modifier
+                .padding(20.dp)
+                .animateContentSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Row(
@@ -405,16 +407,8 @@ private fun BatteryOverviewCard(battery: Battery) {
         }
     }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+    OverviewCard(
+        backgroundIcon = {
             val chargingIcons = remember {
                 listOf(R.drawable.mobile_charge_filled, R.drawable.bolt_filled, R.drawable.bolt_boost_filled)
             }
@@ -463,67 +457,64 @@ private fun BatteryOverviewCard(battery: Battery) {
                         .alpha(0.20f),
                 )
             }
-
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(
-                        text = "${battery.level}%",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        fontWeight = FontWeight.Bold,
-                    )
-                    AnimatedContent(
-                        targetState = displayStatus,
-                        transitionSpec = {
-                            (
-                                slideInHorizontally(
-                                    initialOffsetX = { -it },
-                                    animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
-                                ) + scaleIn(
-                                    animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
-                                )
-                                ).togetherWith(
-                                slideOutHorizontally(
-                                    targetOffsetX = { -it },
-                                    animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
-                                ) + scaleOut(
-                                    animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
-                                ),
+        },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = "${battery.level}%",
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    fontWeight = FontWeight.Bold,
+                )
+                AnimatedContent(
+                    targetState = displayStatus,
+                    transitionSpec = {
+                        (
+                            slideInHorizontally(
+                                initialOffsetX = { -it },
+                                animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
+                            ) + scaleIn(
+                                animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
                             )
-                        },
-                        label = "BatteryStatusAnimation",
-                    ) { status ->
-                        Text(
-                            text = status,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
+                            ).togetherWith(
+                            slideOutHorizontally(
+                                targetOffsetX = { -it },
+                                animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
+                            ) + scaleOut(
+                                animationSpec = tween(TRANSITION_DURATION, easing = FastOutSlowInEasing),
+                            ),
                         )
-                    }
+                    },
+                    label = "BatteryStatusAnimation",
+                ) { status ->
+                    Text(
+                        text = status,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                 }
+            }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    val healthText = if (battery.healthPercentage > 0) {
-                        "${battery.health} (${battery.healthPercentage}%)"
-                    } else {
-                        battery.health
-                    }
-                    BadgeChip(
-                        text = healthText,
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        textColor = MaterialTheme.colorScheme.onPrimary,
-                    )
-                    BadgeChip(
-                        text = battery.technology,
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        textColor = MaterialTheme.colorScheme.onTertiary,
-                    )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                val healthText = if (battery.healthPercentage > 0) {
+                    "${battery.health} (${battery.healthPercentage}%)"
+                } else {
+                    battery.health
                 }
+                BadgeChip(
+                    text = healthText,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    textColor = MaterialTheme.colorScheme.onPrimary,
+                )
+                BadgeChip(
+                    text = battery.technology,
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    textColor = MaterialTheme.colorScheme.onTertiary,
+                )
             }
         }
     }
@@ -705,29 +696,5 @@ private fun BatteryHelpContent() {
         "Uptime & Deep Sleep" to "Uptime is the total time since boot. Deep Sleep is the time the CPU was in a low-power state.",
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp)
-            .padding(bottom = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Text(
-            text = "Data Sources",
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-        )
-
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            items(helpItems) { (title, description) ->
-                HelpItem(
-                    title = title,
-                    description = description,
-                )
-            }
-        }
-    }
+    HelpBottomSheetContent(helpItems = helpItems)
 }

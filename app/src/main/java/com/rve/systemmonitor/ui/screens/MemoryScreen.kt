@@ -3,7 +3,6 @@ package com.rve.systemmonitor.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -14,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -41,6 +38,7 @@ import com.rve.systemmonitor.R
 import com.rve.systemmonitor.domain.model.RAM
 import com.rve.systemmonitor.domain.model.Storage
 import com.rve.systemmonitor.domain.model.ZRAM
+import com.rve.systemmonitor.ui.components.card.OverviewCard
 import com.rve.systemmonitor.ui.components.dialog.InfoDialog
 import com.rve.systemmonitor.ui.components.row.MemoryStorageProgressRow
 import com.rve.systemmonitor.ui.viewmodel.MemoryUiState
@@ -181,16 +179,8 @@ private fun DetailedMemoryCard(ram: RAM, onItemClick: (String, String) -> Unit) 
 
 @Composable
 private fun StorageCard(storage: Storage) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+    OverviewCard(
+        backgroundIcon = {
             Icon(
                 painter = painterResource(R.drawable.database_filled),
                 contentDescription = null,
@@ -201,39 +191,36 @@ private fun StorageCard(storage: Storage) {
                     .offset(y = 30.dp)
                     .alpha(0.20f),
             )
+        },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            MemoryStorageProgressRow(
+                label = "Internal Storage",
+                usedValue = storage.used.toString(),
+                totalValue = storage.total.toString(),
+                usedPercentage = if (storage.usedPercentage.isNaN()) 0f else storage.usedPercentage.toFloat(),
+                freeValue = storage.available.toString(),
+            )
 
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f),
+                thickness = 1.dp,
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                MemoryStorageProgressRow(
-                    label = "Internal Storage",
-                    usedValue = storage.used.toString(),
-                    totalValue = storage.total.toString(),
-                    usedPercentage = if (storage.usedPercentage.isNaN()) 0f else storage.usedPercentage.toFloat(),
-                    freeValue = storage.available.toString(),
+                StorageInfoItem(
+                    label = "Mount Path",
+                    value = storage.mountPath,
+                    modifier = Modifier.weight(1.5f),
                 )
-
-                HorizontalDivider(
-                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.4f),
-                    thickness = 1.dp,
+                StorageInfoItem(
+                    label = "Filesystem",
+                    value = storage.fileSystemType,
+                    modifier = Modifier.weight(1f),
                 )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    StorageInfoItem(
-                        label = "Mount Path",
-                        value = storage.mountPath,
-                        modifier = Modifier.weight(1.5f),
-                    )
-                    StorageInfoItem(
-                        label = "Filesystem",
-                        value = storage.fileSystemType,
-                        modifier = Modifier.weight(1f),
-                    )
-                }
             }
         }
     }
@@ -303,16 +290,8 @@ private fun MemoryDetailItem(
 
 @Composable
 private fun MemoryCard(ram: RAM, zram: ZRAM) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+    OverviewCard(
+        backgroundIcon = {
             Icon(
                 painter = painterResource(R.drawable.memory_alt_filled),
                 contentDescription = null,
@@ -323,29 +302,26 @@ private fun MemoryCard(ram: RAM, zram: ZRAM) {
                     .offset(y = 30.dp)
                     .alpha(0.20f),
             )
+        },
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            MemoryStorageProgressRow(
+                label = "RAM",
+                usedValue = ram.used.toString(),
+                totalValue = ram.total.toString(),
+                usedPercentage = if (ram.usedPercentage.isNaN()) 0f else ram.usedPercentage.toFloat(),
+                freeValue = ram.available.toString(),
+            )
 
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-            ) {
+            if (zram.isActive) {
                 MemoryStorageProgressRow(
-                    label = "RAM",
-                    usedValue = ram.used.toString(),
-                    totalValue = ram.total.toString(),
-                    usedPercentage = if (ram.usedPercentage.isNaN()) 0f else ram.usedPercentage.toFloat(),
-                    freeValue = ram.available.toString(),
+                    label = "ZRAM",
+                    usedValue = zram.used.toString(),
+                    totalValue = zram.total.toString(),
+                    usedPercentage = if (zram.usedPercentage.isNaN()) 0f else zram.usedPercentage.toFloat(),
+                    freeValue = zram.available.toString(),
+                    progressColor = MaterialTheme.colorScheme.tertiary,
                 )
-
-                if (zram.isActive) {
-                    MemoryStorageProgressRow(
-                        label = "ZRAM",
-                        usedValue = zram.used.toString(),
-                        totalValue = zram.total.toString(),
-                        usedPercentage = if (zram.usedPercentage.isNaN()) 0f else zram.usedPercentage.toFloat(),
-                        freeValue = zram.available.toString(),
-                        progressColor = MaterialTheme.colorScheme.tertiary,
-                    )
-                }
             }
         }
     }
