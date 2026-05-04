@@ -194,8 +194,9 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    val displaySign = if (isDischarging && battery.current != 0) "-" else ""
                     Text(
-                        text = if (battery.current != 0) "$currentMA mA" else "0 mA",
+                        text = if (battery.current != 0) "$displaySign$currentMA mA" else "0 mA",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = accentColor,
@@ -302,8 +303,9 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                     }
 
                     if (history.size >= 2) {
+                        val sign = if (isDischarging) "-" else ""
                         Text(
-                            text = "MAX: ${actualMax.toInt()} mA",
+                            text = "MAX: $sign${actualMax.toInt()} mA",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                             modifier = Modifier
@@ -311,7 +313,7 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                                 .padding(top = 4.dp, start = 4.dp),
                         )
                         Text(
-                            text = "MIN: ${minValInHistory.toInt()} mA",
+                            text = "MIN: $sign${minValInHistory.toInt()} mA",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                             modifier = Modifier
