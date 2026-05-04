@@ -210,20 +210,24 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                 )
             }
 
-            val actualMax = remember(history) {
-                if (history.isNotEmpty()) history.maxOf { abs(it.mA) }.toFloat() else 0f
+            val currentSessionHistory = remember(history, battery.status) {
+                history.takeLastWhile { it.status == battery.status }
+            }
+
+            val actualMax = remember(currentSessionHistory) {
+                if (currentSessionHistory.isNotEmpty()) currentSessionHistory.maxOf { abs(it.mA) }.toFloat() else 0f
             }
             val renderMax = remember(actualMax) {
                 actualMax.coerceAtLeast(1000f)
             }
-            val minValInHistory = remember(history) {
-                if (history.isNotEmpty()) history.minOf { abs(it.mA) }.toFloat() else 0f
+            val minValInHistory = remember(currentSessionHistory) {
+                if (currentSessionHistory.isNotEmpty()) currentSessionHistory.minOf { abs(it.mA) }.toFloat() else 0f
             }
 
             val enterTransition = if (hasAnimated) EnterTransition.None else fadeIn(animationSpec = tween(1000))
 
             AnimatedVisibility(
-                visible = history.size >= 2,
+                visible = currentSessionHistory.size >= 2,
                 enter = enterTransition,
                 exit = fadeOut(),
             ) {
@@ -240,25 +244,25 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                     val density = LocalDensity.current
                     val strokeWidth = with(density) { 3.dp.toPx() }
 
-                    val (linePath, fillPath) = remember(history, renderMax, width, height) {
-                        if (history.size < 2) return@remember Path() to Path()
+                    val (linePath, fillPath) = remember(currentSessionHistory, renderMax, width, height) {
+                        if (currentSessionHistory.size < 2) return@remember Path() to Path()
 
                         val minVal = 0f
                         val range = if (renderMax > 0) renderMax - minVal else 1f
-                        val stepX = width / (history.size - 1)
+                        val stepX = width / (currentSessionHistory.size - 1)
 
                         fun getY(value: Int): Float {
                             return height - ((abs(value).toFloat() - minVal) / range * height)
                         }
 
                         val p = Path()
-                        p.moveTo(0f, getY(history[0].mA))
+                        p.moveTo(0f, getY(currentSessionHistory[0].mA))
 
-                        for (i in 0 until history.size - 1) {
+                        for (i in 0 until currentSessionHistory.size - 1) {
                             val x1 = i * stepX
-                            val y1 = getY(history[i].mA)
+                            val y1 = getY(currentSessionHistory[i].mA)
                             val x2 = (i + 1) * stepX
-                            val y2 = getY(history[i + 1].mA)
+                            val y2 = getY(currentSessionHistory[i + 1].mA)
 
                             val controlPoint1X = x1 + (x2 - x1) / 2
                             val controlPoint1Y = y1
@@ -285,7 +289,7 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                     }
 
                     Canvas(modifier = Modifier.fillMaxSize()) {
-                        if (history.size > 1) {
+                        if (currentSessionHistory.size > 1) {
                             drawPath(
                                 path = linePath,
                                 color = accentColor,
@@ -302,7 +306,7 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                         }
                     }
 
-                    if (history.size >= 2) {
+                    if (currentSessionHistory.size >= 2) {
                         val sign = if (isDischarging) "-" else ""
                         Text(
                             text = "MAX: $sign${actualMax.toInt()} mA",
@@ -321,9 +325,9 @@ private fun ChargingSpeedCard(battery: Battery, history: List<BatteryDataPoint>,
                                 .padding(bottom = 4.dp, start = 4.dp),
                         )
 
-                        history.forEachIndexed { index, point ->
-                            if (index > 0 && point.status != history[index - 1].status) {
-                                val xRatio = index.toFloat() / (history.size - 1)
+                        currentSessionHistory.forEachIndexed { index, point ->
+                            if (index > 0 && point.status != currentSessionHistory[index - 1].status) {
+                                val xRatio = index.toFloat() / (currentSessionHistory.size - 1)
                                 val yRatio = (abs(point.mA).toFloat() / renderMax).coerceIn(0f, 1f)
 
                                 val statusLabel = when (point.status) {
