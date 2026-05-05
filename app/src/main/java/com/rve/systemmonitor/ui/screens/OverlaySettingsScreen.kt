@@ -99,6 +99,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
     val isFpsEnabled by viewModel.isFpsEnabled.collectAsStateWithLifecycle()
     val isRamPercentageEnabled by viewModel.isRamPercentageEnabled.collectAsStateWithLifecycle()
     val isRamGbEnabled by viewModel.isRamGbEnabled.collectAsStateWithLifecycle()
+    val isBatteryTempEnabled by viewModel.isBatteryTempEnabled.collectAsStateWithLifecycle()
     val updateIntervalMillis by viewModel.overlayUpdateInterval.collectAsStateWithLifecycle()
     val textSize by viewModel.overlayTextSize.collectAsStateWithLifecycle()
     val bgOpacity by viewModel.overlayBgOpacity.collectAsStateWithLifecycle()
@@ -107,7 +108,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
     val isVerticalLayout by viewModel.isVerticalLayout.collectAsStateWithLifecycle()
     val cornerRadius by viewModel.overlayCornerRadius.collectAsStateWithLifecycle()
 
-    val isAnyMetricEnabled = isFpsEnabled || isRamPercentageEnabled || isRamGbEnabled
+    val isAnyMetricEnabled = isFpsEnabled || isRamPercentageEnabled || isRamGbEnabled || isBatteryTempEnabled
     val appearanceAlpha by animateFloatAsState(
         targetValue = if (isAnyMetricEnabled) 1f else 0.5f,
         label = "Appearance Alpha Animation",
@@ -129,6 +130,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
         fps: Boolean = isFpsEnabled,
         ramPercentage: Boolean = isRamPercentageEnabled,
         ramGb: Boolean = isRamGbEnabled,
+        batteryTemp: Boolean = isBatteryTempEnabled,
         interval: Long = updateIntervalMillis,
         size: Float = textSize,
         opacity: Float = bgOpacity,
@@ -138,7 +140,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
         radius: Int = cornerRadius,
     ) {
         val ramEnabled = ramPercentage || ramGb
-        if (fps || ramEnabled) {
+        if (fps || ramEnabled || batteryTemp) {
             if (Settings.canDrawOverlays(context)) {
                 val intent = Intent(context, SystemOverlayService::class.java).apply {
                     putExtra("update_delay", interval)
@@ -146,6 +148,7 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                     putExtra("show_ram", ramEnabled)
                     putExtra("show_ram_percentage", ramPercentage)
                     putExtra("show_ram_gb", ramGb)
+                    putExtra("show_battery_temp", batteryTemp)
                     putExtra("text_size", size)
                     putExtra("bg_opacity", opacity)
                     putExtra("padding", padd)
@@ -321,6 +324,27 @@ fun OverlaySettingsScreen(viewModel: OverlaySettingsViewModel = hiltViewModel(),
                                 val nextState = !isRamPercentageEnabled
                                 viewModel.setRamPercentageEnabled(nextState)
                                 updateService(ramPercentage = nextState)
+                            }
+                        },
+                    )
+
+                    MetricToggleCard(
+                        title = "Battery Temperature",
+                        description = "Show real-time battery temperature",
+                        icon = R.drawable.device_thermostat_filled,
+                        isEnabled = isBatteryTempEnabled,
+                        hasPermission = hasOverlayPermission,
+                        onClick = rememberHapticOnClick {
+                            if (!hasOverlayPermission && !isBatteryTempEnabled) {
+                                val intent = Intent(
+                                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    "package:${context.packageName}".toUri(),
+                                )
+                                context.startActivity(intent)
+                            } else {
+                                val nextState = !isBatteryTempEnabled
+                                viewModel.setBatteryTempEnabled(nextState)
+                                updateService(batteryTemp = nextState)
                             }
                         },
                     )

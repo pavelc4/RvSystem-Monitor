@@ -7,6 +7,7 @@ interface OverlayRepository {
     val isRamEnabled: Flow<Boolean>
     val isRamPercentageEnabled: Flow<Boolean>
     val isRamGbEnabled: Flow<Boolean>
+    val isBatteryTempEnabled: Flow<Boolean>
     val overlayUpdateInterval: Flow<Long>
     val overlayTextSize: Flow<Float>
     val overlayBgOpacity: Flow<Float>
@@ -19,6 +20,7 @@ interface OverlayRepository {
     suspend fun setRamEnabled(enabled: Boolean)
     suspend fun setRamPercentageEnabled(enabled: Boolean)
     suspend fun setRamGbEnabled(enabled: Boolean)
+    suspend fun setBatteryTempEnabled(enabled: Boolean)
     suspend fun setOverlayUpdateInterval(delayMillis: Long)
     suspend fun setOverlayTextSize(size: Float)
     suspend fun setOverlayBgOpacity(opacity: Float)

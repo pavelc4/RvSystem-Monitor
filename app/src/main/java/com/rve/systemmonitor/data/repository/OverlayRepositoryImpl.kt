@@ -16,6 +16,7 @@ class OverlayRepositoryImpl @Inject constructor(application: Application) : Over
     override val isRamEnabled: Flow<Boolean> = overlayPreferences.isRamEnabledFlow
     override val isRamPercentageEnabled: Flow<Boolean> = overlayPreferences.isRamPercentageEnabledFlow
     override val isRamGbEnabled: Flow<Boolean> = overlayPreferences.isRamGbEnabledFlow
+    override val isBatteryTempEnabled: Flow<Boolean> = overlayPreferences.isBatteryTempEnabledFlow
     override val overlayUpdateInterval: Flow<Long> = overlayPreferences.overlayUpdateIntervalFlow
     override val overlayTextSize: Flow<Float> = overlayPreferences.overlayTextSizeFlow
     override val overlayBgOpacity: Flow<Float> = overlayPreferences.overlayBgOpacityFlow
@@ -38,6 +39,10 @@ class OverlayRepositoryImpl @Inject constructor(application: Application) : Over
 
     override suspend fun setRamGbEnabled(enabled: Boolean) {
         overlayPreferences.saveIsRamGbEnabled(enabled)
+    }
+
+    override suspend fun setBatteryTempEnabled(enabled: Boolean) {
+        overlayPreferences.saveIsBatteryTempEnabled(enabled)
     }
 
     override suspend fun setOverlayUpdateInterval(delayMillis: Long) {
