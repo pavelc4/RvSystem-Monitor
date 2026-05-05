@@ -1,10 +1,7 @@
 # Project-specific ProGuard rules for RvSystem-Monitor
 
-# 1. JNI: Keep classes and their native methods for Rust linkage
--keep class com.rve.systemmonitor.utils.CpuUtils {
-    native <methods>;
-}
--keep class com.rve.systemmonitor.utils.MemoryUtils {
+# 1. JNI: Keep classes and their native methods for linkage
+-keep class com.rve.systemmonitor.utils.** {
     native <methods>;
 }
 

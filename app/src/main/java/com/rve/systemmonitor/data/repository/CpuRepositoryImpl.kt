@@ -52,8 +52,6 @@ class CpuRepositoryImpl @Inject constructor(private val settingsRepository: Sett
                 val maxKhz = CpuUtils.getCoreFrequencyKhz(i, "max_info")
                 val governor = CpuUtils.getCoreGovernor(i)
                 CoreStaticInfo(
-                    minFreq = CpuUtils.formatFrequency(minKhz),
-                    maxFreq = CpuUtils.formatFrequency(maxKhz),
                     minFreqKhz = minKhz,
                     maxFreqKhz = maxKhz,
                     governor = governor,
@@ -62,7 +60,7 @@ class CpuRepositoryImpl @Inject constructor(private val settingsRepository: Sett
 
             while (true) {
                 if (BuildConfig.DEBUG) Log.d(TAG, "CPU Stream Updated")
-                val coreDetails = mutableListOf<CoreDetail>()
+                val coreDetails = ArrayList<CoreDetail>(cores)
                 val dynamicData = CpuUtils.getCpuDynamicData()
 
                 // dynamicData structure: [overall_temp, core0_freq, core0_temp, core1_freq, core1_temp, ...]
@@ -75,9 +73,6 @@ class CpuRepositoryImpl @Inject constructor(private val settingsRepository: Sett
                     coreDetails.add(
                         CoreDetail(
                             id = i,
-                            currentFreq = CpuUtils.formatFrequency(currentKhz),
-                            minFreq = static.minFreq,
-                            maxFreq = static.maxFreq,
                             currentFreqKhz = currentKhz,
                             minFreqKhz = static.minFreqKhz,
                             maxFreqKhz = static.maxFreqKhz,
@@ -106,11 +101,5 @@ class CpuRepositoryImpl @Inject constructor(private val settingsRepository: Sett
         }.flowOn(Dispatchers.IO)
     }
 
-    private data class CoreStaticInfo(
-        val minFreq: String,
-        val maxFreq: String,
-        val minFreqKhz: Long,
-        val maxFreqKhz: Long,
-        val governor: String,
-    )
+    private data class CoreStaticInfo(val minFreqKhz: Long, val maxFreqKhz: Long, val governor: String)
 }

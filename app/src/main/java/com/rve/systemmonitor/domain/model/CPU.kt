@@ -17,12 +17,22 @@ data class CPU(
 @Immutable
 data class CoreDetail(
     val id: Int,
-    val currentFreq: String = "0 MHz",
-    val minFreq: String = "0 MHz",
-    val maxFreq: String = "0 MHz",
     val currentFreqKhz: Long = 0,
     val minFreqKhz: Long = 0,
     val maxFreqKhz: Long = 0,
     val governor: String = "unknown",
     val temperature: Double = 0.0,
-)
+) {
+    // Helper for easy display when needed, but we prefer formatting in UI
+    val currentFreq: String get() = formatFrequency(currentFreqKhz)
+    val minFreq: String get() = formatFrequency(minFreqKhz)
+    val maxFreq: String get() = formatFrequency(maxFreqKhz)
+
+    private fun formatFrequency(freqKhz: Long): String {
+        return if (freqKhz >= 1_000_000) {
+            String.format("%.2f GHz", freqKhz / 1_000_000.0)
+        } else {
+            "${freqKhz / 1000} MHz"
+        }
+    }
+}
