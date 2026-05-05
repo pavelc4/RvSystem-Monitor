@@ -91,11 +91,12 @@ fun CPUScreen(isActive: Boolean, viewModel: CPUViewModel = hiltViewModel()) {
 
 @Composable
 private fun CPUOverviewCard(cpu: CPU) {
-    val peakFrequency = cpu.coreDetails.maxOfOrNull {
-        it.maxFreq.substringBefore(" ").toDoubleOrNull() ?: 0.0
-    } ?: 0.0
-
-    val peakFreqUnit = cpu.coreDetails.firstOrNull()?.maxFreq?.substringAfter(" ") ?: "MHz"
+    val peakFreqKhz = cpu.coreDetails.maxOfOrNull { it.maxFreqKhz } ?: 0L
+    val peakFrequency = if (peakFreqKhz >= 1_000_000) {
+        String.format("%.2f GHz", peakFreqKhz / 1_000_000.0)
+    } else {
+        "${peakFreqKhz / 1000} MHz"
+    }
 
     OverviewCard(
         backgroundIcon = {
@@ -135,7 +136,7 @@ private fun CPUOverviewCard(cpu: CPU) {
                     textColor = MaterialTheme.colorScheme.onTertiary,
                 )
                 BadgeChip(
-                    text = "Peak: $peakFrequency $peakFreqUnit",
+                    text = "Peak: $peakFrequency",
                     containerColor = MaterialTheme.colorScheme.primary,
                     textColor = MaterialTheme.colorScheme.onPrimary,
                 )
