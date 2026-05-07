@@ -29,28 +29,18 @@ class BatteryRepositoryImpl @Inject constructor(private val application: Applica
         val deepSleep = SystemClock.elapsedRealtime() - SystemClock.uptimeMillis()
         if (intent != null) {
             val design = BatteryUtils.getCapacity(application)
-            val actual = BatteryUtils.getActualCapacity(application)
             BatteryInfo(
                 health = BatteryUtils.getHealth(intent),
                 technology = BatteryUtils.getTechnology(intent),
                 designCapacity = design,
-                maxCapacity = actual,
-                healthPercentage = BatteryUtils.getHealthPercentage(actual, design),
                 deepSleep = deepSleep,
             )
         } else {
-            BatteryInfo("Unknown", "Unknown", -1.0, -1.0, -1, deepSleep)
+            BatteryInfo("Unknown", "Unknown", -1.0, deepSleep)
         }
     }
 
-    private data class BatteryInfo(
-        val health: String,
-        val technology: String,
-        val designCapacity: Double,
-        val maxCapacity: Double,
-        val healthPercentage: Int,
-        val deepSleep: Long,
-    )
+    private data class BatteryInfo(val health: String, val technology: String, val designCapacity: Double, val deepSleep: Long)
 
     override fun getBatteryInfo(): Battery {
         val intent = BatteryUtils.getBatteryIntent(application)
@@ -67,15 +57,12 @@ class BatteryRepositoryImpl @Inject constructor(private val application: Applica
                 voltage = voltage,
                 temperature = BatteryUtils.getTemperature(intent),
                 capacity = staticBatteryInfo.designCapacity,
-                maxCapacity = staticBatteryInfo.maxCapacity,
-                healthPercentage = staticBatteryInfo.healthPercentage,
                 cycleCount = BatteryUtils.getCycleCount(intent),
                 uptime = SystemClock.elapsedRealtime(),
                 deepSleep = staticBatteryInfo.deepSleep,
                 current = current,
                 wattage = calculateWattage(current, voltage),
                 powerSource = BatteryUtils.getPowerSource(intent),
-                remainingCapacity = calculateRemainingCapacity(level, staticBatteryInfo.maxCapacity),
             )
         } else {
             Battery()
@@ -107,15 +94,12 @@ class BatteryRepositoryImpl @Inject constructor(private val application: Applica
                 voltage = voltage,
                 temperature = BatteryUtils.getTemperature(intent),
                 capacity = staticBatteryInfo.designCapacity,
-                maxCapacity = staticBatteryInfo.maxCapacity,
-                healthPercentage = staticBatteryInfo.healthPercentage,
                 cycleCount = BatteryUtils.getCycleCount(intent),
                 uptime = SystemClock.elapsedRealtime(),
                 deepSleep = staticBatteryInfo.deepSleep,
                 current = currentNow,
                 wattage = calculateWattage(currentNow, voltage),
                 powerSource = BatteryUtils.getPowerSource(intent),
-                remainingCapacity = calculateRemainingCapacity(level, staticBatteryInfo.maxCapacity),
             )
         }.flowOn(Dispatchers.IO)
     }
@@ -125,10 +109,5 @@ class BatteryRepositoryImpl @Inject constructor(private val application: Applica
         // mA -> A: currentMA / 1000.0
         // mV -> V: voltageMV / 1000.0
         return (abs(currentMA) / 1000.0) * (voltageMV / 1000.0)
-    }
-
-    private fun calculateRemainingCapacity(level: Int, maxCapacity: Double): Double {
-        if (level < 0 || maxCapacity <= 0) return 0.0
-        return (level / 100.0) * maxCapacity
     }
 }

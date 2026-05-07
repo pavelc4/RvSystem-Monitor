@@ -44,8 +44,6 @@ class BatteryViewModel @Inject constructor(private val batteryRepository: Batter
             health = static.health,
             technology = static.technology,
             capacity = static.capacity,
-            maxCapacity = static.maxCapacity,
-            healthPercentage = static.healthPercentage,
             cycleCount = static.cycleCount,
             deepSleep = static.deepSleep,
         )

@@ -489,13 +489,8 @@ private fun BatteryOverviewCard(battery: Battery) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                val healthText = if (battery.healthPercentage > 0) {
-                    "${battery.health} (${battery.healthPercentage}%)"
-                } else {
-                    battery.health
-                }
                 BadgeChip(
-                    text = healthText,
+                    text = battery.health,
                     containerColor = MaterialTheme.colorScheme.primary,
                     textColor = MaterialTheme.colorScheme.onPrimary,
                 )
@@ -614,22 +609,6 @@ private fun BatteryDetailsCard(battery: Battery, onHelpClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 InfoItem(
-                    label = "Remaining Capacity",
-                    value = if (battery.remainingCapacity > 0) "${battery.remainingCapacity.toInt()} mAh" else "Unknown",
-                    modifier = Modifier.weight(1f),
-                )
-                InfoItem(
-                    label = "Maximum Capacity",
-                    value = if (battery.maxCapacity > 0) "${battery.maxCapacity.toInt()} mAh" else "Unknown",
-                    modifier = Modifier.weight(1f),
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                InfoItem(
                     label = "Design Capacity",
                     value = if (battery.capacity > 0) "${battery.capacity.toInt()} mAh" else "Unknown",
                     modifier = Modifier.weight(1f),
@@ -679,8 +658,7 @@ private fun BatteryHelpContent() {
         "Charging Speed" to "Estimated based on real-time wattage: Fast Charging (15W+) and Hyper Charging (25W+).",
         "Wattage (Power)" to "Calculated in real-time by multiplying Voltage (V) and Current (A).",
         "Current (mA)" to "Direct hardware reading from the battery's charge counter property.",
-        "Capacity (Design/Max/Remaining)" to "Extracted from Android PowerProfile and battery charge counter calculations. " +
-            "Maximum Capacity and Health Percentage are estimates and may not be 100% accurate.",
+        "Design Capacity" to "Extracted from Android PowerProfile. Indicates the factory-rated capacity of the battery.",
         "Cycle Count" to "Native Android 14+ property indicating total charge cycles completed.",
         "Uptime & Deep Sleep" to "Uptime is the total time since boot. Deep Sleep is the time the CPU was in a low-power state.",
     )
